@@ -24,6 +24,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const recommendationContainer = document.getElementById('recommendation-container');
     const recommendationText = document.getElementById('recommendation-text');
     const programList = document.getElementById('program-list');
+    
+    const strongPointContainer = document.getElementById('strong-point-container');
+    const strongPointTitle = document.getElementById('strong-point-title');
+    const strongPointImage = document.getElementById('strong-point-image');
+    const strongPointDescription = document.getElementById('strong-point-description');
+
+    const programModal = document.getElementById('program-modal');
+    const modalCloseButton = document.querySelector('.close-button');
+    const modalImage = document.getElementById('modal-image');
+    const modalTitle = document.getElementById('modal-title');
+    const modalDescription = document.getElementById('modal-description');
 
     const chartInstances = {};
 
@@ -41,6 +52,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         for (const topic in allQuestions) {
             categoryScores[topic] = {};
+            for (const category in allQuestions[topic]) {
+                categoryScores[topic][category] = 0;
+            }
         }
     }
 
@@ -77,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function() {
             optionsData.forEach(option => {
                 const input = document.createElement('input');
                 input.type = 'radio';
-                input.name = `q${currentTopicIndex}-${currentPageIndex}-${index}`; // << 이 부분을 수정했습니다.
+                input.name = `q${currentTopicIndex}-${currentPageIndex}-${index}`;
                 input.value = option.value;
                 input.id = `q${currentTopicIndex}-${currentPageIndex}-${index}-${option.value}`;
                 
@@ -104,8 +118,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-    
-    // 이 밑으로는 기존 코드와 동일합니다.
+
     nextButton.addEventListener('click', function() {
         const currentTopic = surveyTopics[currentTopicIndex];
         const currentCategories = Object.keys(allQuestions[currentTopic]);
@@ -120,7 +133,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         currentQuestions.forEach((_, index) => {
-            // 질문 별로 고유한 name을 참조하도록 수정
             const answeredOption = document.querySelector(`input[name="q${currentTopicIndex}-${currentPageIndex}-${index}"]:checked`);
             if (!answeredOption) {
                 allAnswered = false;
@@ -202,8 +214,34 @@ document.addEventListener('DOMContentLoaded', function() {
         
         drawRadarChart('myChart1', categories1, data1, 50); 
         drawRadarChart('myChart2', categories2, data2, 50);
+
+        // 결과 화면에 점수별 멘트 추가
+        let scoreDescriptionHTML = '<h4>점수별 역량 해석</h4>';
+        scoreDescriptionHTML += `<p><strong>40~50점:</strong> 매우 강점 (해당 분야에 대한 관심,참여 의지가 높고 역량도 강함)</p>`;
+        scoreDescriptionHTML += `<p><strong>30~39점:</strong> 보통 이상 (관심과 역량이 평균 이상, 꾸준한 활동 시 더 성장 가능)</p>`;
+        scoreDescriptionHTML += `<p><strong>20~29점:</strong> 보통 이하 (관심이 낮거나 경험 부족, 활동 기회 확대 필요)</p>`;
+        scoreDescriptionHTML += `<p><strong>10~19점:</strong> 매우 부족 (관심,참여도가 낮고 경험이 거의 없음.집중지원 필요)</p>`;
+        resultText.innerHTML = scoreDescriptionHTML;
         
-        resultText.textContent = '두 차트를 통해 당신의 활동 분야와 핵심 역량을 확인해보세요.';
+        // 강점 분야 멘트 및 추천 프로그램 로직 실행
+        const allCategoryScores = {};
+        for(const topic in categoryScores) {
+            Object.assign(allCategoryScores, categoryScores[topic]);
+        }
+        
+        const sortedCategories = Object.keys(allCategoryScores).sort((a, b) => allCategoryScores[b] - allCategoryScores[a]);
+        const highestScoreCategory = sortedCategories[0];
+        const highestScore = allCategoryScores[highestScoreCategory];
+        
+        if (highestScore >= 35) { // 35점 이상이면 강점 분야로 분류
+            strongPointTitle.textContent = '당신의 강점 분야';
+            strongPointImage.src = programRecommendations[highestScoreCategory][0].strongPointImage;
+            strongPointDescription.innerHTML = `당신은 **<${highestScoreCategory}>** 분야에 강점을 가지고 있습니다! <br>해당 분야에 대한 관심과 역량이 매우 뛰어나며, 앞으로도 꾸준한 활동을 통해 더 큰 성장을 이룰 수 있을 것입니다.`;
+            strongPointContainer.classList.remove('hidden');
+        } else {
+            strongPointContainer.classList.add('hidden');
+        }
+
         recommendPrograms();
     }
 
@@ -214,10 +252,24 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         const sortedCategories = Object.keys(allCategoryScores).sort((a, b) => allCategoryScores[a] - allCategoryScores[b]);
-        const lowestScoreCategory = sortedCategories[0];
         
+        // 25점 이하인 보완 필요 분야를 먼저 찾습니다.
+        let lowestScoreCategory = sortedCategories.find(category => allCategoryScores[category] <= 25);
+        
+        // 25점 이하가 없으면 가장 점수가 낮은 분야를 찾습니다.
+        if (!lowestScoreCategory) {
+            lowestScoreCategory = sortedCategories[0];
+        }
+
         if (programRecommendations[lowestScoreCategory]) {
-            recommendationText.textContent = `당신의 점수가 가장 낮은 분야는 <${lowestScoreCategory}> 입니다. 이 역량을 강화하기 위한 프로그램을 추천합니다.`;
+            let recommendationMessage = '';
+            if (allCategoryScores[lowestScoreCategory] <= 25) {
+                recommendationMessage = `당신의 점수가 가장 낮은 분야는 **<${lowestScoreCategory}>** 입니다. 이는 **보완이 필요한 분야**로 분류됩니다. 이 역량을 강화하기 위한 프로그램을 추천합니다.`;
+            } else {
+                recommendationMessage = `당신의 점수가 가장 낮은 분야는 **<${lowestScoreCategory}>** 입니다. 이 역량을 강화하기 위한 프로그램을 추천합니다.`;
+            }
+            recommendationText.innerHTML = recommendationMessage;
+
             programList.innerHTML = '';
             programRecommendations[lowestScoreCategory].forEach(program => {
                 const li = document.createElement('li');
