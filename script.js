@@ -220,7 +220,7 @@ document.addEventListener('DOMContentLoaded', function() {
         scoreDescriptionHTML += `<p><strong>40~50점:</strong> 매우 강점 (해당 분야에 대한 관심,참여 의지가 높고 역량도 강함)</p>`;
         scoreDescriptionHTML += `<p><strong>30~39점:</strong> 보통 이상 (관심과 역량이 평균 이상, 꾸준한 활동 시 더 성장 가능)</p>`;
         scoreDescriptionHTML += `<p><strong>20~29점:</strong> 보통 이하 (관심이 낮거나 경험 부족, 활동 기회 확대 필요)</p>`;
-        scoreDescriptionHTML += `<p><strong>10~19점:</strong> 매우 부족 (관심,참여도가 낮고 경험이 거의 없음.집중지원 필요)</p>`;
+        scoreDescriptionHTML += `<p><strong>10~19점:</strong> 매우 부족 (관심,참여도가 낮고 경험이 거의 없음. 맞춤형 프로그램을 통한 성장 필요)</p>`;
         resultText.innerHTML = scoreDescriptionHTML;
         
         // 강점 분야 멘트 및 추천 프로그램 로직 실행
@@ -236,7 +236,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (highestScore >= 35) { // 35점 이상이면 강점 분야로 분류
             strongPointTitle.textContent = '당신의 강점 분야';
             strongPointImage.src = programRecommendations[highestScoreCategory][0].strongPointImage;
-            strongPointDescription.innerHTML = `당신은 **<${highestScoreCategory}>** 분야에 강점을 가지고 있습니다! <br>해당 분야에 대한 관심과 역량이 매우 뛰어나며, 앞으로도 꾸준한 활동을 통해 더 큰 성장을 이룰 수 있을 것입니다.`;
+            strongPointDescription.innerHTML = `당신은 <${highestScoreCategory}> 분야에 강점을 가지고 있습니다! <br>해당 분야에 대한 관심과 역량이 매우 뛰어나며, 앞으로도 꾸준한 활동을 통해 더 큰 성장을 이룰 수 있을 것입니다.`;
             strongPointContainer.classList.remove('hidden');
         } else {
             strongPointContainer.classList.add('hidden');
@@ -264,9 +264,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (programRecommendations[lowestScoreCategory]) {
             let recommendationMessage = '';
             if (allCategoryScores[lowestScoreCategory] <= 25) {
-                recommendationMessage = `당신의 점수가 가장 낮은 분야는 **<${lowestScoreCategory}>** 입니다. 이는 **보완이 필요한 분야**로 분류됩니다. 이 역량을 강화하기 위한 프로그램을 추천합니다.`;
+                recommendationMessage = `당신의 점수가 가장 낮은 분야는 <${lowestScoreCategory}> 입니다. 이는 보완이 필요한 분야로 분류됩니다. 이 역량을 강화하기 위한 프로그램을 추천합니다.`;
             } else {
-                recommendationMessage = `당신의 점수가 가장 낮은 분야는 **<${lowestScoreCategory}>** 입니다. 이 역량을 강화하기 위한 프로그램을 추천합니다.`;
+                recommendationMessage = `당신의 점수가 가장 낮은 분야는 <${lowestScoreCategory}> 입니다. 이 역량을 강화하기 위한 프로그램을 추천합니다.`;
             }
             recommendationText.innerHTML = recommendationMessage;
 
@@ -344,3 +344,4 @@ document.addEventListener('DOMContentLoaded', function() {
         chartInstances[canvasId] = new Chart(ctx, config);
     }
 });
+
