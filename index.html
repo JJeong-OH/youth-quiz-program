@@ -1,67 +1,14 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>청소년 역량 진단</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div class="container">
-        <div id="start-page">
-            <h1 id="start-title">청소년활동 분야 진단 설문</h1>
-            <p>이 설문은 청소년활동 7대 영역에 대한 당신의 관심과 참여도를 진단합니다.</p>
-            <button id="start-button">설문 시작하기</button>
-        </div>
-        
-        <div id="quiz-page" class="hidden">
-            <h1 id="page-title"></h1>
-            <p id="page-description">아래 문항을 읽고, 본인에게 해당하는 정도를 선택해 주세요.</p>
-            <form id="quiz-form">
-                </form>
-            <div class="navigation-buttons">
-                <button id="prev-button" class="hidden">이전</button>
-                <button id="next-button">다음</button>
-            </div>
-        </div>
-        
-        <div id="topic-transition-page" class="hidden">
-            <h2 id="transition-title"></h2>
-            <p>다음 설문을 이어서 진행하시겠습니까?</p>
-            <button id="continue-button">설문 이어서하기</button>
-        </div>
-
-        <div id="result-page" class="hidden">
-            <h2 id="result-title"></h2>
-            <p id="result-text"></p>
-            <div class="chart-container">
-                <h3 id="chart-title-1"></h3>
-                <canvas id="myChart1"></canvas>
-            </div>
-            <div class="chart-container">
-                <h3 id="chart-title-2"></h3>
-                <canvas id="myChart2"></canvas>
-            </div>
-            <div id="recommendation-container">
-                <h3>맞춤형 추천 프로그램</h3>
-                <p id="recommendation-text"></p>
-                <ul id="program-list"></ul>
-            </div>
-        </div>
-    </div>
-    
-    <div id="program-modal" class="modal hidden">
-        <div class="modal-content">
-            <span class="close-button">&times;</span>
-            <img id="modal-image" src="" alt="Program Image">
-            <h3 id="modal-title"></h3>
-            <p id="modal-description"></p>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="questions.js"></script>
-    <script src="programs.js"></script>
-    <script src="script.js"></script>
-</body>
-</html>
+const programRecommendations = {
+    '자기개발활동': [
+        { name: '자신감 향상 워크숍', description: '자신의 강점을 발견하고 발표하는 훈련을 통해 자신감을 키웁니다.', image: 'https://via.placeholder.com/400x200.png?text=Self-Confidence+Workshop' },
+        { name: '리더십 캠프', description: '다양한 팀 활동을 통해 리더의 역할과 책임감을 배웁니다.', image: 'https://via.placeholder.com/400x200.png?text=Leadership+Camp' },
+        { name: '미래 직업 탐색 프로그램', description: '전문가 멘토링을 통해 자신의 적성에 맞는 직업을 탐색합니다.', image: 'https://via.placeholder.com/400x200.png?text=Career+Exploration' }
+    ],
+    //... 다른 카테고리들도 동일하게 수정
+    '자기관리 역량': [
+        { name: '시간 관리 습관 만들기', description: '효율적인 시간 관리법을 배우고 실천합니다.', image: 'https://via.placeholder.com/400x200.png?text=Time+Management' },
+        { name: '스트레스 해소 상담', description: '전문가와 함께 스트레스 관리법을 배우고 심리적 안정감을 찾습니다.', image: 'https://via.placeholder.com/400x200.png?text=Stress+Counselling' },
+        { name: '건강한 생활 습관 교육', description: '바른 식습관과 운동으로 건강을 관리하는 방법을 배웁니다.', image: 'https://via.placeholder.com/400x200.png?text=Healthy+Lifestyle' }
+    ],
+    //... (모든 카테고리에 strongPointImage 추가)
+};
