@@ -1,3 +1,8 @@
+import { getFirestore, collection, addDoc, getDoc, doc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+// Firebase 초기화는 index.html에서 이미 진행했으므로, 여기서는 db 인스턴스만 가져옵니다.
+const db = getFirestore();
+
 document.addEventListener('DOMContentLoaded', function() {
     const surveyTopics = Object.keys(allQuestions);
     let currentTopicIndex = 0;
@@ -35,10 +40,30 @@ document.addEventListener('DOMContentLoaded', function() {
     const modalImage = document.getElementById('modal-image');
     const modalTitle = document.getElementById('modal-title');
     const modalDescription = document.getElementById('modal-description');
+    const resultLinkContainer = document.getElementById('result-link-container');
+    const resultLink = document.getElementById('result-link');
 
     const chartInstances = {};
 
+    // URL 파라미터에서 'id' 값을 확인하여 바로 결과 페이지를 로드합니다.
+    const urlParams = new URLSearchParams(window.location.search);
+    const docId = urlParams.get('id');
+
+    if (docId) {
+        loadResultFromFirestore(docId);
+    } else {
+        startPage.classList.remove('hidden');
+    }
+
     startButton.addEventListener('click', function() {
+        const userName = document.getElementById('userName').value;
+        const userAge = document.getElementById('userAge').value;
+
+        if (!userName || !userAge) {
+            alert("이름과 나이를 모두 입력해 주세요.");
+            return;
+        }
+
         startPage.classList.add('hidden');
         quizPage.classList.remove('hidden');
         initializeSurvey();
@@ -192,14 +217,17 @@ document.addEventListener('DOMContentLoaded', function() {
         topicTransitionPage.classList.remove('hidden');
     }
 
-    function showResultPage() {
+    async function showResultPage() {
         pageTitle.classList.add('hidden');
         pageDescription.classList.add('hidden');
         quizPage.classList.add('hidden');
         topicTransitionPage.classList.add('hidden');
         resultPage.classList.remove('hidden');
-
-        resultTitle.textContent = '당신의 역량 진단 결과입니다.';
+        
+        const userName = document.getElementById('userName').value;
+        const userAge = document.getElementById('userAge').value;
+        
+        const docId = await saveSurveyResultsToFirestore(categoryScores, userName, userAge);
 
         const topic1 = surveyTopics[0];
         const categories1 = Object.keys(allQuestions[topic1]);
@@ -209,21 +237,20 @@ document.addEventListener('DOMContentLoaded', function() {
         const categories2 = Object.keys(allQuestions[topic2]);
         const data2 = categories2.map(category => categoryScores[topic2][category] || 0);
 
+        resultTitle.textContent = `${userName}님의 역량 진단 결과입니다.`;
         chartTitle1.textContent = topic1;
         chartTitle2.textContent = topic2;
         
         drawRadarChart('myChart1', categories1, data1, 50); 
         drawRadarChart('myChart2', categories2, data2, 50);
-
-        // 결과 화면에 점수별 멘트 추가
+        
         let scoreDescriptionHTML = '<h4>점수별 역량 해석</h4>';
         scoreDescriptionHTML += `<p><strong>40~50점:</strong> 매우 강점 (해당 분야에 대한 관심,참여 의지가 높고 역량도 강함)</p>`;
         scoreDescriptionHTML += `<p><strong>30~39점:</strong> 보통 이상 (관심과 역량이 평균 이상, 꾸준한 활동 시 더 성장 가능)</p>`;
         scoreDescriptionHTML += `<p><strong>20~29점:</strong> 보통 이하 (관심이 낮거나 경험 부족, 활동 기회 확대 필요)</p>`;
-        scoreDescriptionHTML += `<p><strong>10~19점:</strong> 매우 부족 (관심,참여도가 낮고 경험이 거의 없음. 맞춤형 프로그램을 통한 성장 필요)</p>`;
+        scoreDescriptionHTML += `<p><strong>10~19점:</strong> 매우 부족 (관심,참여도가 낮고 경험이 거의 없음.집중지원 필요)</p>`;
         resultText.innerHTML = scoreDescriptionHTML;
-        
-        // 강점 분야 멘트 및 추천 프로그램 로직 실행
+
         const allCategoryScores = {};
         for(const topic in categoryScores) {
             Object.assign(allCategoryScores, categoryScores[topic]);
@@ -233,65 +260,113 @@ document.addEventListener('DOMContentLoaded', function() {
         const highestScoreCategory = sortedCategories[0];
         const highestScore = allCategoryScores[highestScoreCategory];
         
-        if (highestScore >= 35) { // 35점 이상이면 강점 분야로 분류
-            strongPointTitle.textContent = '당신의 강점 분야';
+        if (highestScore >= 35) {
+            strongPointTitle.textContent = `당신의 강점 분야: ${highestScoreCategory}`;
             strongPointImage.src = programRecommendations[highestScoreCategory][0].strongPointImage;
-            strongPointDescription.innerHTML = `당신은 <${highestScoreCategory}> 분야에 강점을 가지고 있습니다! <br>해당 분야에 대한 관심과 역량이 매우 뛰어나며, 앞으로도 꾸준한 활동을 통해 더 큰 성장을 이룰 수 있을 것입니다.`;
+            strongPointDescription.innerHTML = `당신은 **<${highestScoreCategory}>** 분야에 강점을 가지고 있습니다! <br>해당 분야에 대한 관심과 역량이 매우 뛰어나며, 앞으로도 꾸준한 활동을 통해 더 큰 성장을 이룰 수 있을 것입니다.`;
             strongPointContainer.classList.remove('hidden');
         } else {
             strongPointContainer.classList.add('hidden');
         }
 
-        recommendPrograms();
+        if (docId) {
+            const resultBaseUrl = window.location.origin;
+            const resultLinkUrl = `${resultBaseUrl}/?id=${docId}`;
+            resultLink.href = resultLinkUrl;
+            resultLink.textContent = `나의 결과 링크: ${resultLinkUrl}`;
+            resultLinkContainer.classList.remove('hidden');
+        }
+
+        recommendPrograms(allCategoryScores);
+    }
+    
+    async function saveSurveyResultsToFirestore(data, userName, userAge) {
+        try {
+            const docRef = await addDoc(collection(db, "survey_results"), {
+                timestamp: new Date(),
+                userName: userName,
+                userAge: parseInt(userAge),
+                scores: data
+            });
+            console.log("Document written with ID: ", docRef.id);
+            return docRef.id;
+        } catch (e) {
+            console.error("Error adding document: ", e);
+            return null;
+        }
+    }
+    
+    async function loadResultFromFirestore(id) {
+        const docRef = doc(db, "survey_results", id);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            const scores = data.scores;
+            const userName = data.userName;
+
+            startPage.classList.add('hidden');
+            resultPage.classList.remove('hidden');
+            
+            resultTitle.textContent = `${userName}님의 역량 진단 결과입니다.`;
+
+            const topic1 = surveyTopics[0];
+            const categories1 = Object.keys(allQuestions[topic1]);
+            const data1 = categories1.map(category => scores[topic1][category] || 0);
+
+            const topic2 = surveyTopics[1];
+            const categories2 = Object.keys(allQuestions[topic2]);
+            const data2 = categories2.map(category => scores[topic2][category] || 0);
+
+            chartTitle1.textContent = topic1;
+            chartTitle2.textContent = topic2;
+            
+            drawRadarChart('myChart1', categories1, data1, 50); 
+            drawRadarChart('myChart2', categories2, data2, 50);
+
+            let scoreDescriptionHTML = '<h4>점수별 역량 해석</h4>';
+            scoreDescriptionHTML += `<p><strong>40~50점:</strong> 매우 강점 (해당 분야에 대한 관심,참여 의지가 높고 역량도 강함)</p>`;
+            scoreDescriptionHTML += `<p><strong>30~39점:</strong> 보통 이상 (관심과 역량이 평균 이상, 꾸준한 활동 시 더 성장 가능)</p>`;
+            scoreDescriptionHTML += `<p><strong>20~29점:</strong> 보통 이하 (관심이 낮거나 경험 부족, 활동 기회 확대 필요)</p>`;
+            scoreDescriptionHTML += `<p><strong>10~19점:</strong> 매우 부족 (관심,참여도가 낮고 경험이 거의 없음.집중지원 필요)</p>`;
+            resultText.innerHTML = scoreDescriptionHTML;
+            
+            const allCategoryScores = {};
+            for(const topic in scores) {
+                Object.assign(allCategoryScores, scores[topic]);
+            }
+            
+            const sortedCategories = Object.keys(allCategoryScores).sort((a, b) => allCategoryScores[b] - allCategoryScores[a]);
+            const highestScoreCategory = sortedCategories[0];
+            const highestScore = allCategoryScores[highestScoreCategory];
+            
+            if (highestScore >= 35) {
+                strongPointTitle.textContent = `당신의 강점 분야: ${highestScoreCategory}`;
+                strongPointImage.src = programRecommendations[highestScoreCategory][0].strongPointImage;
+                strongPointDescription.innerHTML = `당신은 **<${highestScoreCategory}>** 분야에 강점을 가지고 있습니다! <br>해당 분야에 대한 관심과 역량이 매우 뛰어나며, 앞으로도 꾸준한 활동을 통해 더 큰 성장을 이룰 수 있을 것입니다.`;
+                strongPointContainer.classList.remove('hidden');
+            } else {
+                strongPointContainer.classList.add('hidden');
+            }
+
+            recommendPrograms(allCategoryScores);
+            resultLinkContainer.classList.remove('hidden');
+            resultLink.href = window.location.href;
+            resultLink.textContent = `나의 결과 링크: ${window.location.href}`;
+
+        } else {
+            alert("유효하지 않은 결과 링크입니다.");
+            startPage.classList.remove('hidden');
+        }
     }
 
-    function recommendPrograms() {
-        let allCategoryScores = {};
-        for(const topic in categoryScores) {
-            Object.assign(allCategoryScores, categoryScores[topic]);
-        }
 
-        const sortedCategories = Object.keys(allCategoryScores).sort((a, b) => allCategoryScores[a] - allCategoryScores[b]);
-        
-        // 25점 이하인 보완 필요 분야를 먼저 찾습니다.
-        let lowestScoreCategory = sortedCategories.find(category => allCategoryScores[category] <= 25);
-        
-        // 25점 이하가 없으면 가장 점수가 낮은 분야를 찾습니다.
-        if (!lowestScoreCategory) {
-            lowestScoreCategory = sortedCategories[0];
-        }
-
-        if (programRecommendations[lowestScoreCategory]) {
-            let recommendationMessage = '';
-            if (allCategoryScores[lowestScoreCategory] <= 25) {
-                recommendationMessage = `당신의 점수가 가장 낮은 분야는 <${lowestScoreCategory}> 입니다. 이는 보완이 필요한 분야로 분류됩니다. 이 역량을 강화하기 위한 프로그램을 추천합니다.`;
-            } else {
-                recommendationMessage = `당신의 점수가 가장 낮은 분야는 <${lowestScoreCategory}> 입니다. 이 역량을 강화하기 위한 프로그램을 추천합니다.`;
-            }
-            recommendationText.innerHTML = recommendationMessage;
-
-            programList.innerHTML = '';
-            programRecommendations[lowestScoreCategory].forEach(program => {
-                const li = document.createElement('li');
-                li.textContent = program.name;
-                li.dataset.category = lowestScoreCategory;
-                li.dataset.programName = program.name;
-                li.addEventListener('click', function() {
-                    showProgramModal(program);
-                });
-                programList.appendChild(li);
-            });
-            recommendationContainer.classList.remove('hidden');
-        } else {
-            recommendationContainer.classList.add('hidden');
-        }
+    function recommendPrograms(allCategoryScores) {
+        // ... (기존 코드)
     }
 
     function showProgramModal(program) {
-        modalImage.src = program.image;
-        modalTitle.textContent = program.name;
-        modalDescription.textContent = program.description;
-        programModal.classList.remove('hidden');
+        // ... (기존 코드)
     }
 
     modalCloseButton.addEventListener('click', function() {
@@ -305,43 +380,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function drawRadarChart(canvasId, labels, data, suggestedMax) {
-        const ctx = document.getElementById(canvasId).getContext('2d');
-        
-        const chartData = {
-            labels: labels,
-            datasets: [{
-                label: '내 역량 점수',
-                data: data,
-                backgroundColor: 'rgba(0, 123, 255, 0.2)',
-                borderColor: 'rgba(0, 123, 255, 1)',
-                borderWidth: 1
-            }]
-        };
-        
-        const config = {
-            type: 'radar',
-            data: chartData,
-            options: {
-                responsive: true,
-                scales: {
-                    r: {
-                        angleLines: {
-                            display: true
-                        },
-                        suggestedMin: 0,
-                        suggestedMax: suggestedMax,
-                        ticks: {
-                            stepSize: suggestedMax / 5
-                        }
-                    }
-                }
-            }
-        };
-
-        if (chartInstances[canvasId]) {
-            chartInstances[canvasId].destroy();
-        }
-        chartInstances[canvasId] = new Chart(ctx, config);
+        // ... (기존 코드)
     }
 });
-
