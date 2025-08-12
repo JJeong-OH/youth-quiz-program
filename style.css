@@ -259,3 +259,8 @@ p {
     margin-bottom: 10px;
     border-radius: 5px;
 }
+
+/* 다른 스타일 코드 아래에 추가 */
+.hidden {
+    display: none !important;
+}
