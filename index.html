@@ -1,101 +1,101 @@
-    <!DOCTYPE html>
-    <html lang="ko">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>청소년 역량 진단</title>
-        <link rel="stylesheet" href="style.css">
-        <script type="module">
-            import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-            import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-analytics.js";
-            
-            const firebaseConfig = {
-                apiKey: "AIzaSyB_9EcKuBnV5TvUGYwfk75ax2YfPIYN0Ko",
-                authDomain: "youth-question.firebaseapp.com",
-                projectId: "youth-question",
-                storageBucket: "youth-question.firebasestorage.app",
-                messagingSenderId: "868894049625",
-                appId: "1:868894049625:web:b6b0dcc221e2162361f848",
-                measurementId: "G-M53067LP68"
-            };
-            const app = initializeApp(firebaseConfig);
-            const analytics = getAnalytics(app);
-        </script>
-    </head>
-    <body>
-        <div class="container">
-            <div id="start-page">
-                <h1 id="start-title">청소년활동 분야 진단 설문</h1>
-                <p>이 설문은 청소년활동 7대 영역에 대한 당신의 관심과 참여도를 진단합니다.</p>
-                <div class="input-container">
-                    <label for="userName">이름:</label>
-                    <input type="text" id="userName" placeholder="이름을 입력하세요">
-                </div>
-                <div class="input-container">
-                    <label for="userAge">나이:</label>
-                    <input type="number" id="userAge" placeholder="나이를 입력하세요">
-                </div>
-                <button id="start-button">설문 시작하기</button>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>청소년 역량 진단</title>
+    <link rel="stylesheet" href="style.css">
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-analytics.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyB_9EcKuBnV5TvUGYwfk75ax2YfPIYN0Ko",
+            authDomain: "youth-question.firebaseapp.com",
+            projectId: "youth-question",
+            storageBucket: "youth-question.firebasestorage.app",
+            messagingSenderId: "868894049625",
+            appId: "1:868894049625:web:b6b0dcc221e2162361f848",
+            measurementId: "G-M53067LP68"
+        };
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div id="start-page">
+            <h1 id="start-title">청소년활동 분야 진단 설문</h1>
+            <p>이 설문은 청소년활동 7대 영역에 대한 당신의 관심과 참여도를 진단합니다.</p>
+            <div class="input-container">
+                <label for="userName">이름:</label>
+                <input type="text" id="userName" placeholder="이름을 입력하세요">
             </div>
-            
-            <div id="quiz-page" class="hidden">
-                <h1 id="page-title"></h1>
-                <p id="page-description">아래 문항을 읽고, 본인에게 해당하는 정도를 선택해 주세요.</p>
-                <form id="quiz-form">
-                    </form>
-                <div class="navigation-buttons">
-                    <button id="prev-button" class="hidden">이전</button>
-                    <button id="next-button">다음</button>
-                </div>
+            <div class="input-container">
+                <label for="userAge">나이:</label>
+                <input type="number" id="userAge" placeholder="나이를 입력하세요">
             </div>
-            
-            <div id="topic-transition-page" class="hidden">
-                <h2 id="transition-title"></h2>
-                <p>다음 설문을 이어서 진행하시겠습니까?</p>
-                <button id="continue-button">설문 이어서하기</button>
-            </div>
-
-            <div id="result-page" class="hidden">
-                <h2 id="result-title"></h2>
-                <p id="result-text"></p>
-                <div class="chart-container">
-                    <h3 id="chart-title-1"></h3>
-                    <canvas id="myChart1"></canvas>
-                </div>
-                <div class="chart-container">
-                    <h3 id="chart-title-2"></h3>
-                    <canvas id="myChart2"></canvas>
-                </div>
-                <div id="strong-point-container" class="hidden">
-                    <h3 id="strong-point-title"></h3>
-                    <img id="strong-point-image" src="" alt="강점 분야 이미지" />
-                    <p id="strong-point-description"></p>
-                </div>
-                <div id="recommendation-container">
-                    <h3>맞춤형 추천 프로그램</h3>
-                    <p id="recommendation-text"></p>
-                    <ul id="program-list"></ul>
-                </div>
-                <div id="result-link-container" class="result-box hidden">
-                    <h4>나의 설문 결과 링크</h4>
-                    <p>이 링크를 저장하면 언제든 결과를 다시 확인할 수 있습니다.</p>
-                    <a id="result-link" href="#" target="_blank"></a>
-                </div>
+            <button id="start-button">설문 시작하기</button>
+        </div>
+        
+        <div id="quiz-page" class="hidden">
+            <h1 id="page-title"></h1>
+            <p id="page-description">아래 문항을 읽고, 본인에게 해당하는 정도를 선택해 주세요.</p>
+            <form id="quiz-form">
+                </form>
+            <div class="navigation-buttons">
+                <button id="prev-button" class="hidden">이전</button>
+                <button id="next-button">다음</button>
             </div>
         </div>
         
-        <div id="program-modal" class="modal hidden">
-            <div class="modal-content">
-                <span class="close-button">&times;</span>
-                <img id="modal-image" src="" alt="Program Image">
-                <h3 id="modal-title"></h3>
-                <p id="modal-description"></p>
-            </div>
+        <div id="topic-transition-page" class="hidden">
+            <h2 id="transition-title"></h2>
+            <p>다음 설문을 이어서 진행하시겠습니까?</p>
+            <button id="continue-button">설문 이어서하기</button>
         </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script src="questions.js"></script>
-        <script src="programs.js"></script>
-        <script src="script.js"></script>
-    </body>
-    </html>
+        <div id="result-page" class="hidden">
+            <h2 id="result-title"></h2>
+            <p id="result-text"></p>
+            <div class="chart-container">
+                <h3 id="chart-title-1"></h3>
+                <canvas id="myChart1"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3 id="chart-title-2"></h3>
+                <canvas id="myChart2"></canvas>
+            </div>
+            <div id="strong-point-container" class="hidden">
+                <h3 id="strong-point-title"></h3>
+                <img id="strong-point-image" src="" alt="강점 분야 이미지" />
+                <p id="strong-point-description"></p>
+            </div>
+            <div id="recommendation-container">
+                <h3>맞춤형 추천 프로그램</h3>
+                <p id="recommendation-text"></p>
+                <ul id="program-list"></ul>
+            </div>
+            <div id="result-link-container" class="result-box hidden">
+                <h4>나의 설문 결과 링크</h4>
+                <p>이 링크를 저장하면 언제든 결과를 다시 확인할 수 있습니다.</p>
+                <a id="result-link" href="#" target="_blank"></a>
+            </div>
+        </div>
+    </div>
+    
+    <div id="program-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <img id="modal-image" src="" alt="Program Image">
+            <h3 id="modal-title"></h3>
+            <p id="modal-description"></p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="questions.js"></script>
+    <script src="programs.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
