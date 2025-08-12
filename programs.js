@@ -69,4 +69,5 @@ const programRecommendations = {
         { name: '콘텐츠 크리에이터 양성', description: '영상, 글쓰기 등 다양한 콘텐츠를 제작하는 방법을 배웁니다.', image: 'https://via.placeholder.com/400x200.png?text=Content+Creator' },
         { name: 'SW 코딩 부트캠프', description: '소프트웨어 코딩의 기초를 배우고 프로젝트를 완성합니다.', image: 'https://via.placeholder.com/400x200.png?text=SW+Coding+Bootcamp' }
     ],
+
 };
