@@ -1,6 +1,5 @@
 import { getFirestore, collection, addDoc, getDoc, doc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-// Firebase 초기화는 index.html에서 이미 진행했으므로, 여기서는 db 인스턴스만 가져옵니다.
 const db = getFirestore();
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -45,7 +44,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const chartInstances = {};
 
-    // URL 파라미터에서 'id' 값을 확인하여 바로 결과 페이지를 로드합니다.
     const urlParams = new URLSearchParams(window.location.search);
     const docId = urlParams.get('id');
 
@@ -56,14 +54,33 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     startButton.addEventListener('click', function() {
-        const userName = document.getElementById('userName').value;
-        const userAge = document.getElementById('userAge').value;
-
-        if (!userName || !userAge) {
+        const userNameInput = document.getElementById('userName');
+        const userAgeInput = document.getElementById('userAge');
+        
+        const userName = userNameInput.value.trim();
+        const userAge = userAgeInput.value.trim();
+        
+        let isValid = true;
+        
+        if (!userName) {
+            userNameInput.classList.add('error');
+            isValid = false;
+        } else {
+            userNameInput.classList.remove('error');
+        }
+        
+        if (!userAge) {
+            userAgeInput.classList.add('error');
+            isValid = false;
+        } else {
+            userAgeInput.classList.remove('error');
+        }
+        
+        if (!isValid) {
             alert("이름과 나이를 모두 입력해 주세요.");
             return;
         }
-
+        
         startPage.classList.add('hidden');
         quizPage.classList.remove('hidden');
         initializeSurvey();
@@ -250,7 +267,7 @@ document.addEventListener('DOMContentLoaded', function() {
         scoreDescriptionHTML += `<p><strong>20~29점:</strong> 보통 이하 (관심이 낮거나 경험 부족, 활동 기회 확대 필요)</p>`;
         scoreDescriptionHTML += `<p><strong>10~19점:</strong> 매우 부족 (관심,참여도가 낮고 경험이 거의 없음.집중지원 필요)</p>`;
         resultText.innerHTML = scoreDescriptionHTML;
-
+        
         const allCategoryScores = {};
         for(const topic in categoryScores) {
             Object.assign(allCategoryScores, categoryScores[topic]);
@@ -362,11 +379,45 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     function recommendPrograms(allCategoryScores) {
-        // ... (기존 코드)
+        const sortedCategories = Object.keys(allCategoryScores).sort((a, b) => allCategoryScores[a] - allCategoryScores[b]);
+        
+        let lowestScoreCategory = sortedCategories.find(category => allCategoryScores[category] <= 25);
+        
+        if (!lowestScoreCategory) {
+            lowestScoreCategory = sortedCategories[0];
+        }
+
+        if (programRecommendations[lowestScoreCategory]) {
+            let recommendationMessage = '';
+            if (allCategoryScores[lowestScoreCategory] <= 25) {
+                recommendationMessage = `당신의 점수가 가장 낮은 분야는 **<${lowestScoreCategory}>** 입니다. 이는 **보완이 필요한 분야**로 분류됩니다. 이 역량을 강화하기 위한 프로그램을 추천합니다.`;
+            } else {
+                recommendationMessage = `당신의 점수가 가장 낮은 분야는 **<${lowestScoreCategory}>** 입니다. 이 역량을 강화하기 위한 프로그램을 추천합니다.`;
+            }
+            recommendationText.innerHTML = recommendationMessage;
+
+            programList.innerHTML = '';
+            programRecommendations[lowestScoreCategory].forEach(program => {
+                const li = document.createElement('li');
+                li.textContent = program.name;
+                li.dataset.category = lowestScoreCategory;
+                li.dataset.programName = program.name;
+                li.addEventListener('click', function() {
+                    showProgramModal(program);
+                });
+                programList.appendChild(li);
+            });
+            recommendationContainer.classList.remove('hidden');
+        } else {
+            recommendationContainer.classList.add('hidden');
+        }
     }
 
     function showProgramModal(program) {
-        // ... (기존 코드)
+        modalImage.src = program.image;
+        modalTitle.textContent = program.name;
+        modalDescription.textContent = program.description;
+        programModal.classList.remove('hidden');
     }
 
     modalCloseButton.addEventListener('click', function() {
@@ -380,6 +431,42 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function drawRadarChart(canvasId, labels, data, suggestedMax) {
-        // ... (기존 코드)
+        const ctx = document.getElementById(canvasId).getContext('2d');
+        
+        const chartData = {
+            labels: labels,
+            datasets: [{
+                label: '내 역량 점수',
+                data: data,
+                backgroundColor: 'rgba(0, 123, 255, 0.2)',
+                borderColor: 'rgba(0, 123, 255, 1)',
+                borderWidth: 1
+            }]
+        };
+        
+        const config = {
+            type: 'radar',
+            data: chartData,
+            options: {
+                responsive: true,
+                scales: {
+                    r: {
+                        angleLines: {
+                            display: true
+                        },
+                        suggestedMin: 0,
+                        suggestedMax: suggestedMax,
+                        ticks: {
+                            stepSize: suggestedMax / 5
+                        }
+                    }
+                }
+            }
+        };
+
+        if (chartInstances[canvasId]) {
+            chartInstances[canvasId].destroy();
+        }
+        chartInstances[canvasId] = new Chart(ctx, config);
     }
 });
