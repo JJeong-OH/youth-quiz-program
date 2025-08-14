@@ -53,18 +53,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const resultLink = document.getElementById('result-link');
     const copyLinkButton = document.getElementById('copy-link-button');
 
-    // 복사 버튼에 이벤트 리스너를 추가하는 부분입니다.
-    copyLinkButton.addEventListener('click', async () => {
-        const linkText = resultLink.textContent.replace('나의 결과 링크: ', '');
-        try {
-            await navigator.clipboard.writeText(linkText);
-            alert('링크가 복사되었습니다!');
-        } catch (err) {
-            console.error('클립보드 복사 실패:', err);
-            alert('클립보드 복사에 실패했습니다. 수동으로 복사해 주세요.');
-        }
-    });
-
     const urlParams = new URLSearchParams(window.location.search);
     const docId = urlParams.get('id');
 
@@ -197,7 +185,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const nextButtonText = (currentTopicIndex < surveyTopics.length - 1 || currentPageIndex < currentCategories.length - 1) ? '다음' : '결과 보기';
             nextButton.textContent = nextButtonText;
 
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            // window.scrollTo({ top: 0, behavior: 'smooth' }); // 이 부분을 showResultPage로 옮김
             console.log("퀴즈 페이지 렌더링 완료.");
         } catch(error) {
             console.error("퀴즈 페이지 렌더링 중 오류:", error);
@@ -215,6 +203,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             let allAnswered = true;
             let pageScore = 0;
+            let firstUnansweredQuestion = null;
             
             document.querySelectorAll('.question-container').forEach(el => {
                 el.style.borderColor = '#ddd';
@@ -227,6 +216,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     const questionContainer = document.querySelector(`.question-container[data-index='${index}']`);
                     if(questionContainer) {
                         questionContainer.style.borderColor = 'red';
+                        if (!firstUnansweredQuestion) {
+                            firstUnansweredQuestion = questionContainer;
+                        }
                     }
                 } else {
                     pageScore += parseInt(answeredOption.value);
@@ -235,6 +227,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (!allAnswered) {
                 alert('모든 질문에 응답해 주세요! 답변하지 않은 항목은 빨간색으로 표시됩니다.');
+                if (firstUnansweredQuestion) {
+                    firstUnansweredQuestion.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
                 return;
             }
             
@@ -322,6 +317,8 @@ document.addEventListener('DOMContentLoaded', function() {
         topicTransitionPage.classList.add('hidden');
         resultPage.classList.remove('hidden');
         
+        window.scrollTo({ top: 0, behavior: 'smooth' }); // 결과 페이지로 넘어갈 때 맨 위로 스크롤
+
         resultTitle.textContent = `${userName}님의 역량 진단 결과입니다.`;
 
         const topic1 = surveyTopics[0];
@@ -371,7 +368,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (docId) {
             const resultBaseUrl = window.location.origin;
             const resultLinkUrl = `${resultBaseUrl}/?id=${docId}`;
-            resultLink.textContent = resultLinkUrl; // href를 textContent로 변경
+            resultLink.href = resultLinkUrl;
+            resultLink.textContent = `나의 결과 링크: ${resultLinkUrl}`;
             resultLinkContainer.classList.remove('hidden');
         }
 
