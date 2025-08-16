@@ -2,7 +2,6 @@ import { getFirestore, collection, query, where, getDocs } from "https://www.gst
 import { renderResultPage, showProgramModal, surveyTopics, drawRadarChart, chartInstances, recommendPrograms } from './common.js';
 
 let db;
-const ADMIN_PASSWORD = '1234';
 
 document.addEventListener('DOMContentLoaded', function() {
     if (window.firebaseApp) {
@@ -13,23 +12,17 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     const elements = {
-        passwordCheckPage: document.getElementById('password-check-page'),
-        adminPasswordInput: document.getElementById('adminPassword'),
-        passwordCheckButton: document.getElementById('password-check-button'),
-        searchAndResultPage: document.getElementById('search-and-result-page'),
         searchButton: document.getElementById('search-button'),
         searchNameInput: document.getElementById('searchName'),
         searchBirthdateInput: document.getElementById('searchBirthdate'),
         adminResultLinkArea: document.getElementById('admin-result-link-area'),
         resultLinkList: document.getElementById('result-link-list'),
         newSearchButton: document.getElementById('new-search-button'),
+        programModal: document.getElementById('program-modal'),
+        modalCloseButton: document.querySelector('.close-button'),
     };
 
-    if (elements.passwordCheckPage) elements.passwordCheckPage.classList.remove('hidden');
-
-    if (elements.passwordCheckButton) {
-        elements.passwordCheckButton.addEventListener('click', checkPassword);
-    }
+    // DOMContentLoaded 시점에 바로 이벤트 리스너를 등록합니다.
     if (elements.searchButton) {
         elements.searchButton.addEventListener('click', searchResults);
     }
@@ -43,14 +36,18 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function checkPassword() {
-        if (elements.adminPasswordInput && elements.adminPasswordInput.value === ADMIN_PASSWORD) {
-            if (elements.passwordCheckPage) elements.passwordCheckPage.classList.add('hidden');
-            if (elements.searchAndResultPage) elements.searchAndResultPage.classList.remove('hidden');
-        } else {
-            alert('비밀번호가 틀렸습니다.');
-            if (elements.adminPasswordInput) elements.adminPasswordInput.classList.add('error');
-        }
+    // 모달 관련 이벤트 리스너
+    if (elements.modalCloseButton) {
+        elements.modalCloseButton.addEventListener('click', function() {
+            if (elements.programModal) elements.programModal.classList.add('hidden');
+        });
+    }
+    if (elements.programModal) {
+        window.addEventListener('click', function(event) {
+            if (event.target === elements.programModal) {
+                elements.programModal.classList.add('hidden');
+            }
+        });
     }
 
     async function searchResults() {
@@ -88,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function showResultLinks(results) {
         if (elements.adminResultLinkArea) {
-            elements.resultLinkList.innerHTML = ''; // 기존 목록 초기화
+            elements.resultLinkList.innerHTML = '';
             
             if (results.length > 1) {
                 const listTitle = document.createElement('p');
@@ -101,7 +98,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const link = document.createElement('a');
                 link.href = `/?id=${result.id}`;
                 link.textContent = `결과 ${index + 1} (${timestamp})`;
-                link.target = "_blank"; // 새 탭에서 열기
+                link.target = "_blank";
                 link.style.display = 'block';
                 link.style.margin = '5px 0';
                 
@@ -113,6 +110,4 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // search.html에 불필요한 함수는 제거합니다.
-    // renderResultPage, drawRadarChart, recommendPrograms, showProgramModal 등은
-    // index.js와 common.js에서만 사용합니다.
 });
