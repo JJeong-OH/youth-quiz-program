@@ -213,6 +213,39 @@ p {
     text-decoration: underline;
 }
 
+/* 링크와 복사 버튼을 감싸는 컨테이너 */
+.link-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.link-wrapper #result-link {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #0056b3;
+    text-decoration: underline;
+    font-size: 14px;
+    margin-right: 10px;
+    max-width: 70%;
+}
+
+.link-wrapper #copy-link-button {
+    padding: 5px 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.link-wrapper #copy-link-button:active {
+    background-color: #0056b3;
+}
+
 #program-modal {
     position: fixed;
     z-index: 1000;
@@ -259,7 +292,6 @@ p {
     margin-bottom: 10px;
     border-radius: 5px;
 }
-
 /* 다른 스타일 코드 아래에 추가 */
 .hidden {
     display: none !important;
