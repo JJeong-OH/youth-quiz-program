@@ -1,4 +1,4 @@
-import { getFirestore, collection, addDoc, getDoc, doc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+import { getFirestore, collection, query, where, getDocs, doc, addDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
 let db;
 const chartInstances = {};
@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const startPage = document.getElementById('start-page');
     const startButton = document.getElementById('start-button');
+    const goToSearchButton = document.getElementById('go-to-search-button');
     const quizPage = document.getElementById('quiz-page');
     const topicTransitionPage = document.getElementById('topic-transition-page');
     const continueButton = document.getElementById('continue-button');
@@ -53,60 +54,122 @@ document.addEventListener('DOMContentLoaded', function() {
     const resultLink = document.getElementById('result-link');
     const copyLinkButton = document.getElementById('copy-link-button');
 
+    const passwordCheckPage = document.getElementById('password-check-page');
+    const adminPasswordInput = document.getElementById('adminPassword');
+    const passwordCheckButton = document.getElementById('password-check-button');
+    const searchAndResultPage = document.getElementById('search-and-result-page');
+    const searchArea = document.getElementById('search-area');
+    const searchButton = document.getElementById('search-button');
+    const searchNameInput = document.getElementById('searchName');
+    const searchAgeInput = document.getElementById('searchAge');
+    const resultDisplayArea = document.getElementById('result-display-area');
+    const newSearchButton = document.getElementById('new-search-button');
+
+    const ADMIN_PASSWORD = '1234';
+
     const urlParams = new URLSearchParams(window.location.search);
     const docId = urlParams.get('id');
 
-    if (docId) {
-        console.log(`URL에서 문서 ID 감지: ${docId}. 결과 페이지를 로드합니다.`);
-        loadResultFromFirestore(docId);
+    if (window.location.pathname.includes('search.html')) {
+        if (startPage) startPage.classList.add('hidden');
+        if (resultPage) resultPage.classList.add('hidden');
+        if (passwordCheckPage) passwordCheckPage.classList.remove('hidden');
+
+        if (passwordCheckButton) {
+            passwordCheckButton.addEventListener('click', checkPassword);
+        }
+        if (searchButton) {
+            searchButton.addEventListener('click', searchResults);
+        }
+        if (newSearchButton) {
+            newSearchButton.addEventListener('click', () => {
+                if (resultDisplayArea) resultDisplayArea.classList.add('hidden');
+                if (searchNameInput) searchNameInput.value = '';
+                if (searchAgeInput) searchAgeInput.value = '';
+            });
+        }
     } else {
-        console.log("URL에 문서 ID 없음. 시작 페이지를 보여줍니다.");
-        startPage.classList.remove('hidden');
+        if (docId) {
+            loadResultFromFirestore(docId);
+        } else {
+            if (startPage) startPage.classList.remove('hidden');
+        }
+        if (startButton) {
+            startButton.addEventListener('click', function() {
+                const userNameInput = document.getElementById('userName');
+                const userAgeInput = document.getElementById('userAge');
+                const userName = userNameInput.value.trim();
+                const userAge = userAgeInput.value.trim();
+                if (!userName || !userAge) {
+                    alert("이름과 나이를 모두 입력해 주세요.");
+                    return;
+                }
+                if (startPage) startPage.classList.add('hidden');
+                if (quizPage) quizPage.classList.remove('hidden');
+                initializeSurvey();
+                renderQuizPage();
+            });
+        }
+        
+        if (goToSearchButton) {
+            goToSearchButton.addEventListener('click', () => {
+                window.location.href = 'search.html';
+            });
+        }
+    }
+    
+    if (copyLinkButton) {
+        copyLinkButton.addEventListener('click', async () => {
+            const linkText = resultLink.textContent;
+            try {
+                await navigator.clipboard.writeText(linkText);
+                alert('링크가 복사되었습니다!');
+            } catch (err) {
+                console.error('클립보드 복사 실패:', err);
+                alert('클립보드 복사에 실패했습니다. 수동으로 복사해 주세요.');
+            }
+        });
     }
 
-    startButton.addEventListener('click', function() {
-        console.log("설문 시작하기 버튼 클릭.");
-        try {
-            const userNameInput = document.getElementById('userName');
-            const userAgeInput = document.getElementById('userAge');
-            
-            const userName = userNameInput.value.trim();
-            const userAge = userAgeInput.value.trim();
-            
-            let isValid = true;
-            
-            if (!userName) {
-                userNameInput.classList.add('error');
-                isValid = false;
-            } else {
-                userNameInput.classList.remove('error');
-            }
-            
-            if (!userAge) {
-                userAgeInput.classList.add('error');
-                isValid = false;
-            } else {
-                userAgeInput.classList.remove('error');
-            }
-            
-            if (!isValid) {
-                alert("이름과 나이를 모두 입력해 주세요.");
+    function checkPassword() {
+        if (adminPasswordInput && adminPasswordInput.value === ADMIN_PASSWORD) {
+            if (passwordCheckPage) passwordCheckPage.classList.add('hidden');
+            if (searchAndResultPage) searchAndResultPage.classList.remove('hidden');
+        } else {
+            alert('비밀번호가 틀렸습니다.');
+            if (adminPasswordInput) adminPasswordInput.classList.add('error');
+        }
+    }
+
+    function searchResults() {
+        const searchName = searchNameInput.value.trim();
+        const searchAge = parseInt(searchAgeInput.value);
+
+        if (!searchName || isNaN(searchAge)) {
+            alert('이름과 나이를 모두 입력해 주세요.');
+            return;
+        }
+
+        const q = query(collection(db, 'survey_results'), 
+                        where('userName', '==', searchName),
+                        where('userAge', '==', searchAge));
+
+        getDocs(q).then(querySnapshot => {
+            if (querySnapshot.empty) {
+                alert('해당하는 설문 결과가 없습니다.');
                 return;
             }
-            
-            console.log("이름과 나이 입력 확인. 유효성 검사 통과.");
-            
-            startPage.classList.add('hidden');
-            quizPage.classList.remove('hidden');
-            initializeSurvey();
-            renderQuizPage();
-            console.log("페이지 전환 성공.");
 
-        } catch(error) {
-            console.error("설문 시작 버튼 클릭 중 오류:", error);
-            alert("오류가 발생했습니다. 개발자 콘솔을 확인해주세요.");
-        }
-    });
+            const latestResult = querySnapshot.docs[querySnapshot.docs.length - 1];
+            const data = latestResult.data();
+            renderResultPage(data.scores, data.userName);
+            if (resultDisplayArea) resultDisplayArea.classList.remove('hidden');
+
+        }).catch(error => {
+            console.error('검색 중 오류 발생:', error);
+            alert('검색 중 오류가 발생했습니다.');
+        });
+    }
 
     function initializeSurvey() {
         console.log("설문 초기화 시작.");
@@ -122,7 +185,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         console.log("설문 초기화 완료. categoryScores:", categoryScores);
     }
-
+    
     function renderQuizPage() {
         try {
             console.log(`퀴즈 페이지 렌더링 시작. 주제: ${surveyTopics[currentTopicIndex]}, 페이지: ${currentPageIndex}`);
@@ -185,7 +248,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const nextButtonText = (currentTopicIndex < surveyTopics.length - 1 || currentPageIndex < currentCategories.length - 1) ? '다음' : '결과 보기';
             nextButton.textContent = nextButtonText;
 
-            // window.scrollTo({ top: 0, behavior: 'smooth' }); // 이 부분을 showResultPage로 옮김
+            window.scrollTo({ top: 0, behavior: 'smooth' });
             console.log("퀴즈 페이지 렌더링 완료.");
         } catch(error) {
             console.error("퀴즈 페이지 렌더링 중 오류:", error);
@@ -311,15 +374,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function renderResultPage(scores, userName, docId = null) {
-        pageTitle.classList.add('hidden');
-        pageDescription.classList.add('hidden');
-        quizPage.classList.add('hidden');
-        topicTransitionPage.classList.add('hidden');
-        resultPage.classList.remove('hidden');
+        if (passwordCheckPage) passwordCheckPage.classList.add('hidden');
+        if (searchAndResultPage) searchAndResultPage.classList.add('hidden');
+        if (startPage) startPage.classList.add('hidden');
+        if (quizPage) quizPage.classList.add('hidden');
+        if (topicTransitionPage) topicTransitionPage.classList.add('hidden');
+        if (resultPage) resultPage.classList.remove('hidden');
         
-        window.scrollTo({ top: 0, behavior: 'smooth' }); // 결과 페이지로 넘어갈 때 맨 위로 스크롤
+        window.scrollTo({ top: 0, behavior: 'smooth' });
 
-        resultTitle.textContent = `${userName}님의 역량 진단 결과입니다.`;
+        if (resultTitle) resultTitle.textContent = `${userName}님의 역량 진단 결과입니다.`;
 
         const topic1 = surveyTopics[0];
         const categories1 = Object.keys(allQuestions[topic1]);
@@ -329,8 +393,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const categories2 = Object.keys(allQuestions[topic2]);
         const data2 = categories2.map(category => scores[topic2][category] || 0);
 
-        chartTitle1.textContent = topic1;
-        chartTitle2.textContent = topic2;
+        if (chartTitle1) chartTitle1.textContent = topic1;
+        if (chartTitle2) chartTitle2.textContent = topic2;
         
         drawRadarChart('myChart1', categories1, data1, 50); 
         drawRadarChart('myChart2', categories2, data2, 50);
@@ -340,7 +404,7 @@ document.addEventListener('DOMContentLoaded', function() {
         scoreDescriptionHTML += `<p><strong>30~39점:</strong> 보통 이상 (관심과 역량이 평균 이상, 꾸준한 활동 시 더 성장 가능)</p>`;
         scoreDescriptionHTML += `<p><strong>20~29점:</strong> 보통 이하 (관심이 낮거나 경험 부족, 활동 기회 확대 필요)</p>`;
         scoreDescriptionHTML += `<p><strong>10~19점:</strong> 매우 부족 (관심,참여도가 낮고 경험이 거의 없음.집중지원 필요)</p>`;
-        resultText.innerHTML = scoreDescriptionHTML;
+        if (resultText) resultText.innerHTML = scoreDescriptionHTML;
         
         const allCategoryScores = {};
         for(const topic in scores) {
@@ -352,28 +416,28 @@ document.addEventListener('DOMContentLoaded', function() {
         const highestScore = allCategoryScores[highestScoreCategory];
         
         if (highestScore >= 35) {
-            strongPointTitle.textContent = `당신의 강점 분야: ${highestScoreCategory}`;
+            if (strongPointTitle) strongPointTitle.textContent = `당신의 강점 분야: ${highestScoreCategory}`;
             const strongPointProgram = programRecommendations[highestScoreCategory].find(p => p.strongPointImage);
-            if (strongPointProgram) {
+            if (strongPointProgram && strongPointImage) {
                 strongPointImage.src = strongPointProgram.strongPointImage;
-            } else {
+            } else if (strongPointImage) {
                 strongPointImage.src = "https://via.placeholder.com/600x300.png?text=No+Image";
             }
-            strongPointDescription.innerHTML = `당신은 **<${highestScoreCategory}>** 분야에 강점을 가지고 있습니다! <br>해당 분야에 대한 관심과 역량이 매우 뛰어나며, 앞으로도 꾸준한 활동을 통해 더 큰 성장을 이룰 수 있을 것입니다.`;
-            strongPointContainer.classList.remove('hidden');
+            if (strongPointDescription) strongPointDescription.innerHTML = `당신은 **<${highestScoreCategory}>** 분야에 강점을 가지고 있습니다! <br>해당 분야에 대한 관심과 역량이 매우 뛰어나며, 앞으로도 꾸준한 활동을 통해 더 큰 성장을 이룰 수 있을 것입니다.`;
+            if (strongPointContainer) strongPointContainer.classList.remove('hidden');
         } else {
-            strongPointContainer.classList.add('hidden');
+            if (strongPointContainer) strongPointContainer.classList.add('hidden');
         }
 
         if (docId) {
             const resultBaseUrl = window.location.origin;
             const resultLinkUrl = `${resultBaseUrl}/?id=${docId}`;
-            resultLink.href = resultLinkUrl;
-            resultLink.textContent = `나의 결과 링크: ${resultLinkUrl}`;
-            resultLinkContainer.classList.remove('hidden');
+            if (resultLink) resultLink.href = resultLinkUrl;
+            if (resultLink) resultLink.textContent = resultLinkUrl;
+            if (resultLinkContainer) resultLinkContainer.classList.remove('hidden');
         }
 
-        recommendPrograms(allCategoryScores);
+        if (recommendationContainer) recommendPrograms(allCategoryScores);
     }
     
     async function saveSurveyResultsToFirestore(data, userName, userAge) {
@@ -408,12 +472,12 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 console.error("오류: 유효하지 않은 문서 ID입니다.");
                 alert("유효하지 않은 결과 링크입니다.");
-                startPage.classList.remove('hidden');
+                if (startPage) startPage.classList.remove('hidden');
             }
         } catch(e) {
             console.error("Firestore에서 문서 로딩 중 오류:", e);
             alert("결과를 불러오는 중 오류가 발생했습니다. 개발자 콘솔을 확인해주세요.");
-            startPage.classList.remove('hidden');
+            if (startPage) startPage.classList.remove('hidden');
         }
     }
 
@@ -434,9 +498,9 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 recommendationMessage = `당신의 점수가 가장 낮은 분야는 **<${lowestScoreCategory}>** 입니다. 이 역량을 강화하기 위한 프로그램을 추천합니다.`;
             }
-            recommendationText.innerHTML = recommendationMessage;
+            if (recommendationText) recommendationText.innerHTML = recommendationMessage;
 
-            programList.innerHTML = '';
+            if (programList) programList.innerHTML = '';
             programRecommendations[lowestScoreCategory].forEach(program => {
                 const li = document.createElement('li');
                 li.textContent = program.name;
@@ -445,30 +509,34 @@ document.addEventListener('DOMContentLoaded', function() {
                 li.addEventListener('click', function() {
                     showProgramModal(program);
                 });
-                programList.appendChild(li);
+                if (programList) programList.appendChild(li);
             });
-            recommendationContainer.classList.remove('hidden');
+            if (recommendationContainer) recommendationContainer.classList.remove('hidden');
         } else {
-            recommendationContainer.classList.add('hidden');
+            if (recommendationContainer) recommendationContainer.classList.add('hidden');
         }
     }
 
     function showProgramModal(program) {
-        modalImage.src = program.image;
-        modalTitle.textContent = program.name;
-        modalDescription.textContent = program.description;
-        programModal.classList.remove('hidden');
+        if (modalImage) modalImage.src = program.image;
+        if (modalTitle) modalTitle.textContent = program.name;
+        if (modalDescription) modalDescription.textContent = program.description;
+        if (programModal) programModal.classList.remove('hidden');
     }
 
-    modalCloseButton.addEventListener('click', function() {
-        programModal.classList.add('hidden');
-    });
+    if (modalCloseButton) {
+        modalCloseButton.addEventListener('click', function() {
+            if (programModal) programModal.classList.add('hidden');
+        });
+    }
 
-    window.addEventListener('click', function(event) {
-        if (event.target === programModal) {
-            programModal.classList.add('hidden');
-        }
-    });
+    if (programModal) {
+        window.addEventListener('click', function(event) {
+            if (event.target === programModal) {
+                programModal.classList.add('hidden');
+            }
+        });
+    }
 
     function drawRadarChart(canvasId, labels, data, suggestedMax) {
         const ctx = document.getElementById(canvasId).getContext('2d');
