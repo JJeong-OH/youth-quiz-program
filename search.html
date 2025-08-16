@@ -8,17 +8,7 @@
 </head>
 <body>
     <div class="container">
-        <div id="password-check-page">
-            <h1>설문 결과 조회</h1>
-            <p>담당자만 접근 가능합니다. 비밀번호를 입력해주세요.</p>
-            <div class="input-container">
-                <label for="adminPassword">비밀번호:</label>
-                <input type="password" id="adminPassword" placeholder="비밀번호를 입력하세요">
-            </div>
-            <button id="password-check-button">로그인</button>
-        </div>
-
-        <div id="search-and-result-page" class="hidden">
+        <div id="search-and-result-page">
             <div id="search-area">
                 <p>이름과 생년월일을 입력하여 지난 설문 결과를 확인하세요.</p>
                 <div class="input-container">
@@ -41,6 +31,15 @@
         </div>
     </div>
 
+    <div id="program-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <img id="modal-image" src="" alt="Program Image">
+            <h3 id="modal-title"></h3>
+            <p id="modal-description"></p>
+        </div>
+    </div>
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
