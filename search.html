@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -64,3 +65,71 @@
     <script type="module" src="search.js"></script>
 </body>
 </html>
+=======
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>설문 결과 조회</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div id="search-and-result-page">
+            <div id="search-area">
+                <p>이름과 생년월일을 입력하여 지난 설문 결과를 확인하세요.</p>
+                <div class="input-container">
+                    <label for="searchName">이름:</label>
+                    <input type="text" id="searchName" placeholder="이름을 입력하세요">
+                </div>
+                <div class="input-container">
+                    <label for="searchBirthdate">생년월일:</label>
+                    <input type="date" id="searchBirthdate" required>
+                </div>
+                <button id="search-button">결과 조회</button>
+            </div>
+            
+            <div id="admin-result-link-area" class="hidden">
+                <h4>검색된 설문 결과</h4>
+                <p>결과 보기를 누르면 새 탭에서 결과가 열립니다.</p>
+                <div id="result-link-list"></div>
+                <button id="new-search-button">새로운 검색</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="program-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <img id="modal-image" src="" alt="Program Image">
+            <h3 id="modal-title"></h3>
+            <p id="modal-description"></p>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyB_9EcKuBnV5TvUGYwfk75ax2YfPIYN0Ko",
+            authDomain: "youth-question.firebaseapp.com",
+            projectId: "youth-question",
+            storageBucket: "youth-question.firebasestorage.app",
+            messagingSenderId: "868894049625",
+            appId: "1:868894049625:web:b6b0dcc221e2162361f848",
+            measurementId: "G-M53067LP68"
+        };
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        window.firebaseApp = app; 
+    </script>
+    <script src="questions.js"></script>
+    <script src="programs.js"></script>
+    <script type="module" src="common.js"></script>
+    <script type="module" src="search.js"></script>
+</body>
+</html>
+>>>>>>> 1d4996a6a459c76766e56ec5fdd8df680eedc5fc
