@@ -10,7 +10,7 @@
     <div class="container">
         <div id="start-page">
             <h1 id="start-title">청소년활동 분야 진단 설문</h1>
-            <p>이 설문은 청소년활동 7대 영역에 대한 당신의 관심과 참여도를 진단합니다.</p>
+            <p>이 설문은 청소년활동 7대 영역과 청소년활동 역량에 대한 당신의 관심과 참여도를 진단합니다.</p>
             <div class="input-container">
                 <label for="userName">이름:</label>
                 <input type="text" id="userName" placeholder="이름을 입력하세요">
@@ -24,7 +24,7 @@
         
         <div id="quiz-page" class="hidden">
             <h1 id="page-title"></h1>
-            <p id="page-description">아래 문항을 읽고, 본인에게 해당하는 정도를 선택해 주세요.</p>
+            <div id="quiz-description-area"></div>
             <form id="quiz-form"></form>
             <div class="navigation-buttons">
                 <button id="prev-button" class="hidden">이전</button>
@@ -54,7 +54,7 @@
                 <img id="strong-point-image" src="" alt="강점 분야 이미지" />
                 <p id="strong-point-description"></p>
             </div>
-            <div id="recommendation-container">
+            <div id="recommendation-container" class="hidden">
                 <h3>맞춤형 추천 프로그램</h3>
                 <p id="recommendation-text"></p>
                 <ul id="program-list"></ul>
@@ -62,8 +62,10 @@
             <div id="result-link-container" class="result-box hidden">
                 <h4>나의 설문 결과 링크</h4>
                 <p>이 링크를 저장하면 언제든 결과를 다시 확인할 수 있습니다.</p>
-                <a id="result-link" href="#"></a>
-                <button id="copy-link-button">복사</button>
+                <div class="link-wrapper">
+                    <a id="result-link" href="#" target="_blank"></a>
+                    <button id="copy-link-button">복사</button>
+                </div>
             </div>
         </div>
     </div>
@@ -82,6 +84,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
         
+        // --- 원래 코드에 있던 Firebase 설정값으로 복원 ---
         const firebaseConfig = {
             apiKey: "AIzaSyB_9EcKuBnV5TvUGYwfk75ax2YfPIYN0Ko",
             authDomain: "youth-question.firebaseapp.com",
@@ -91,10 +94,13 @@
             appId: "1:868894049625:web:b6b0dcc221e2162361f848",
             measurementId: "G-M53067LP68"
         };
+        // ---------------------------------------------
+
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
         window.firebaseApp = app; 
     </script>
+    
     <script src="questions.js"></script>
     <script src="programs.js"></script>
     <script type="module" src="common.js"></script>

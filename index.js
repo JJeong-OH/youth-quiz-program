@@ -1,5 +1,6 @@
 import { getFirestore, collection, addDoc, getDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { renderResultPage, showProgramModal, surveyTopics, drawRadarChart, chartInstances, recommendPrograms } from './common.js';
+import { allQuestions, topicDescriptions } from './questions.js';
+import { renderResultPage, surveyTopics } from './common.js';
 
 let db;
 let currentTopicIndex = 0;
@@ -17,12 +18,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const elements = {
         startPage: document.getElementById('start-page'),
         startButton: document.getElementById('start-button'),
-        goToSearchButton: document.getElementById('go-to-search-button'),
         quizPage: document.getElementById('quiz-page'),
         topicTransitionPage: document.getElementById('topic-transition-page'),
         continueButton: document.getElementById('continue-button'),
         pageTitle: document.getElementById('page-title'),
-        pageDescription: document.getElementById('page-description'),
+        quizDescriptionArea: document.getElementById('quiz-description-area'),
         quizForm: document.getElementById('quiz-form'),
         prevButton: document.getElementById('prev-button'),
         nextButton: document.getElementById('next-button'),
@@ -31,9 +31,6 @@ document.addEventListener('DOMContentLoaded', function() {
         userBirthdateInput: document.getElementById('userBirthdate'),
         programModal: document.getElementById('program-modal'),
         modalCloseButton: document.querySelector('.close-button'),
-        modalImage: document.getElementById('modal-image'),
-        modalTitle: document.getElementById('modal-title'),
-        modalDescription: document.getElementById('modal-description'),
         resultLink: document.getElementById('result-link'),
     };
 
@@ -41,48 +38,43 @@ document.addEventListener('DOMContentLoaded', function() {
     const docId = urlParams.get('id');
 
     if (docId) {
+        elements.startPage?.classList.add('hidden');
         loadResultFromFirestore(docId);
     } else {
-        if (elements.startPage) elements.startPage.classList.remove('hidden');
-    }
-
-    if (elements.startButton) {
-        elements.startButton.addEventListener('click', function() {
-            const userName = elements.userNameInput.value.trim();
-            const userBirthdate = elements.userBirthdateInput.value.trim();
-            if (!userName || !userBirthdate) {
-                alert("이름과 생년월일을 모두 입력해 주세요.");
-                return;
-            }
-            if (elements.startPage) elements.startPage.classList.add('hidden');
-            if (elements.quizPage) elements.quizPage.classList.remove('hidden');
-            initializeSurvey();
-            renderQuizPage();
-        });
+        elements.startPage?.classList.remove('hidden');
+        if (elements.startButton) {
+            elements.startButton.addEventListener('click', function() {
+                const userName = elements.userNameInput.value.trim();
+                const userBirthdate = elements.userBirthdateInput.value.trim();
+                if (!userName || !userBirthdate) {
+                    alert("이름과 생년월일을 모두 입력해 주세요.");
+                    return;
+                }
+                elements.startPage?.classList.add('hidden');
+                elements.quizPage?.classList.remove('hidden');
+                initializeSurvey();
+                renderQuizPage();
+            });
+        }
     }
     
-    if (elements.goToSearchButton) {
-        elements.goToSearchButton.addEventListener('click', () => {
-            window.location.href = 'search.html';
-        });
-    }
-
     if (elements.copyLinkButton) {
         elements.copyLinkButton.addEventListener('click', async () => {
-            const linkText = elements.resultLink ? elements.resultLink.textContent : '';
+            const linkText = elements.resultLink ? elements.resultLink.href : '';
+            if (!linkText) return;
             try {
                 await navigator.clipboard.writeText(linkText);
                 alert('링크가 복사되었습니다!');
             } catch (err) {
                 console.error('클립보드 복사 실패:', err);
-                alert('클립보드 복사에 실패했습니다. 수동으로 복사해 주세요.');
+                alert('클립보드 복사에 실패했습니다.');
             }
         });
     }
     
     if (elements.modalCloseButton) {
         elements.modalCloseButton.addEventListener('click', function() {
-            if (elements.programModal) elements.programModal.classList.add('hidden');
+            elements.programModal?.classList.add('hidden');
         });
     }
 
@@ -114,10 +106,27 @@ document.addEventListener('DOMContentLoaded', function() {
             const currentCategory = currentCategories[currentPageIndex];
 
             if (elements.pageTitle) elements.pageTitle.textContent = `${currentTopic}`;
-            if (elements.pageDescription) elements.pageDescription.textContent = `${currentPageIndex + 1}. ${currentCategory}에 대한 질문입니다.`;
+            
+            if (elements.quizDescriptionArea) {
+                const descriptionData = topicDescriptions[currentCategory];
+                let descHtml = '';
+
+                if (descriptionData && descriptionData.description) {
+                    descHtml = `
+                        <h4>${currentCategory}</h4>
+                        <ul class="description-list" style="text-align: left; padding-left: 20px; margin-bottom: 0;">
+                            ${descriptionData.description.map(item => `<li>${item}</li>`).join('')}
+                        </ul>
+                    `;
+                }
+
+                descHtml += `<p style="margin-top: 20px;">아래 문항들을 읽고, 본인에게 해당하는 정도를 각각 선택해 주세요.</p>`;
+                elements.quizDescriptionArea.innerHTML = descHtml;
+            }
 
             if (elements.quizForm) elements.quizForm.innerHTML = '';
             
+            // --- ⬇️ 여러 질문을 모두 화면에 표시하도록 수정 ⬇️ ---
             const currentQuestions = allQuestions[currentTopic]?.[currentCategory] || [];
             
             currentQuestions.forEach((questionText, index) => {
@@ -126,29 +135,31 @@ document.addEventListener('DOMContentLoaded', function() {
                 questionContainer.dataset.index = index;
                 
                 const p = document.createElement('p');
-                p.textContent = `${questionText}`;
+                // 각 질문 앞에 번호를 붙여줌
+                p.textContent = `${index + 1}. ${questionText}`;
                 questionContainer.appendChild(p);
 
                 const optionsDiv = document.createElement('div');
                 optionsDiv.classList.add('options');
                 
                 const optionsData = [
-                    { value: 1, text: '1. 전혀 그렇지 않다' },
-                    { value: 2, text: '2. 그렇지 않다' },
-                    { value: 3, text: '3. 보통이다' },
-                    { value: 4, text: '4. 그렇다' },
-                    { value: 5, text: '5. 매우 그렇다' }
+                    { value: 1, text: '전혀 그렇지 않다' },
+                    { value: 2, text: '그렇지 않다' },
+                    { value: 3, text: '보통이다' },
+                    { value: 4, text: '그렇다' },
+                    { value: 5, text: '매우 그렇다' }
                 ];
 
                 optionsData.forEach(option => {
                     const input = document.createElement('input');
                     input.type = 'radio';
+                    // 각 질문의 name 속성을 고유하게 만들어줌
                     input.name = `q${currentTopicIndex}-${currentPageIndex}-${index}`;
                     input.value = option.value;
                     input.id = `q${currentTopicIndex}-${currentPageIndex}-${index}-${option.value}`;
                     
                     const label = document.createElement('label');
-                    label.htmlFor = `q${currentTopicIndex}-${currentPageIndex}-${index}-${option.value}`;
+                    label.htmlFor = input.id;
                     label.textContent = option.text;
 
                     optionsDiv.appendChild(input);
@@ -156,20 +167,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
 
                 questionContainer.appendChild(optionsDiv);
-                if (elements.quizForm) elements.quizForm.appendChild(questionContainer);
+                elements.quizForm?.appendChild(questionContainer);
             });
 
-            if (elements.prevButton) {
-                elements.prevButton.classList.toggle('hidden', currentPageIndex === 0 && currentTopicIndex === 0);
-            }
+            elements.prevButton?.classList.toggle('hidden', currentPageIndex === 0 && currentTopicIndex === 0);
 
-            const nextButtonText = (currentTopicIndex < surveyTopics.length - 1 || currentPageIndex < currentCategories.length - 1) ? '다음' : '결과 보기';
-            if (elements.nextButton) elements.nextButton.textContent = nextButtonText;
+            const isLastPage = (currentTopicIndex >= surveyTopics.length - 1) && (currentPageIndex >= currentCategories.length - 1);
+            if (elements.nextButton) elements.nextButton.textContent = isLastPage ? '결과 보기' : '다음';
 
             window.scrollTo({ top: 0, behavior: 'smooth' });
         } catch(error) {
             console.error("퀴즈 페이지 렌더링 중 오류:", error);
-            alert("퀴즈 페이지를 불러오는 중 오류가 발생했습니다. 개발자 콘솔을 확인해주세요.");
+            alert("퀴즈 페이지를 불러오는 중 오류가 발생했습니다.");
         }
     }
 
@@ -207,9 +216,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 if (!allAnswered) {
                     alert('모든 질문에 응답해 주세요! 답변하지 않은 항목은 빨간색으로 표시됩니다.');
-                    if (firstUnansweredQuestion) {
-                        firstUnansweredQuestion.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
+                    firstUnansweredQuestion?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     return;
                 }
                 
@@ -219,14 +226,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     currentPageIndex++;
                     renderQuizPage();
                 } else if (currentTopicIndex < surveyTopics.length - 1) {
-                    if (elements.quizPage) elements.quizPage.classList.add('hidden');
+                    elements.quizPage?.classList.add('hidden');
                     showTopicTransitionPage();
                 } else {
                     showResultPage();
                 }
             } catch(error) {
                 console.error("다음 버튼 클릭 중 오류:", error);
-                alert("오류가 발생했습니다. 개발자 콘솔을 확인해주세요.");
+                alert("오류가 발생했습니다.");
             }
         });
     }
@@ -236,18 +243,15 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 if (currentPageIndex > 0) {
                     currentPageIndex--;
-                    renderQuizPage();
                 } else if (currentTopicIndex > 0) {
-                    if (elements.topicTransitionPage) elements.topicTransitionPage.classList.remove('hidden');
-                    if (elements.quizPage) elements.quizPage.classList.add('hidden');
                     currentTopicIndex--;
                     const prevCategories = Object.keys(allQuestions[surveyTopics[currentTopicIndex]]);
                     currentPageIndex = prevCategories.length - 1;
-                    renderQuizPage();
                 }
+                renderQuizPage();
             } catch(error) {
                 console.error("이전 버튼 클릭 중 오류:", error);
-                alert("오류가 발생했습니다. 개발자 콘솔을 확인해주세요.");
+                alert("오류가 발생했습니다.");
             }
         });
     }
@@ -255,8 +259,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (elements.continueButton) {
         elements.continueButton.addEventListener('click', function() {
             try {
-                if (elements.topicTransitionPage) elements.topicTransitionPage.classList.add('hidden');
-                if (elements.quizPage) elements.quizPage.classList.remove('hidden');
+                elements.topicTransitionPage?.classList.add('hidden');
+                elements.quizPage?.classList.remove('hidden');
                 
                 currentTopicIndex++;
                 currentPageIndex = 0;
@@ -264,14 +268,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 renderQuizPage();
             } catch(error) {
                 console.error("설문 이어서하기 버튼 클릭 중 오류:", error);
-                alert("오류가 발생했습니다. 개발자 콘솔을 확인해주세요.");
+                alert("오류가 발생했습니다.");
             }
         });
     }
 
     function showTopicTransitionPage() {
-        if (elements.transitionTitle) elements.transitionTitle.textContent = surveyTopics[currentTopicIndex + 1];
-        if (elements.topicTransitionPage) elements.topicTransitionPage.classList.remove('hidden');
+        const transitionTitle = document.getElementById('transition-title');
+        if (transitionTitle) transitionTitle.textContent = surveyTopics[currentTopicIndex + 1];
+        elements.topicTransitionPage?.classList.remove('hidden');
     }
 
     async function showResultPage() {
@@ -279,22 +284,45 @@ document.addEventListener('DOMContentLoaded', function() {
             const userName = elements.userNameInput.value;
             const userBirthdate = elements.userBirthdateInput.value;
 
-            const docId = await saveSurveyResultsToFirestore(categoryScores, userName, userBirthdate);
-            renderResultPage(categoryScores, userName, docId);
+            const allCategoryScores = Object.values(categoryScores).reduce((acc, val) => Object.assign(acc, val), {});
+            
+            const sortedCategoriesHigh = Object.keys(allCategoryScores).sort((a, b) => allCategoryScores[b] - allCategoryScores[a]);
+            const highestScore = allCategoryScores[sortedCategoriesHigh[0]];
+            const highestScoreCategories = sortedCategoriesHigh.filter(category => allCategoryScores[category] === highestScore);
+            const highestScoreCategory = highestScoreCategories[0];
+            
+            let strongestMessage = '';
+            const count = highestScoreCategories.length;
+            if (count >= 5) {
+                strongestMessage = `**${highestScoreCategories.join(', ')}** 등 여러 분야에서 뛰어난 역량을 보이고 있습니다.`;
+            } else if (count >= 2) {
+                strongestMessage = `**${highestScoreCategories.join(', ')}** 분야에서 뛰어난 강점을 가지고 있습니다.`;
+            } else {
+                strongestMessage = `당신의 가장 뚜렷한 강점 분야는 **<${highestScoreCategory}>** 입니다.`;
+            }
+
+            const sortedCategoriesLow = Object.keys(allCategoryScores).sort((a, b) => allCategoryScores[a] - allCategoryScores[b]);
+            const lowestScore = allCategoryScores[sortedCategoriesLow[0]];
+            const weakestScoreCategories = sortedCategoriesLow.filter(category => allCategoryScores[category] === lowestScore);
+            
+            const docId = await saveSurveyResultsToFirestore(categoryScores, userName, userBirthdate, highestScoreCategory, weakestScoreCategories.join(', '));
+            renderResultPage(categoryScores, userName, docId, highestScoreCategory, strongestMessage, weakestScoreCategories);
 
         } catch(error) {
             console.error("결과 페이지 로드 중 오류:", error);
-            alert("결과를 불러오는 중 오류가 발생했습니다. 개발자 콘솔을 확인해주세요.");
+            alert("결과를 불러오는 중 오류가 발생했습니다.");
         }
     }
 
-    async function saveSurveyResultsToFirestore(data, userName, userBirthdate) {
+    async function saveSurveyResultsToFirestore(data, userName, userBirthdate, highestScoreCategory, weakestScoreCategory) {
         try {
             const docRef = await addDoc(collection(db, "survey_results"), {
                 timestamp: new Date(),
                 userName: userName,
                 userBirthdate: userBirthdate,
-                scores: data
+                scores: data,
+                highestScoreCategory: highestScoreCategory,
+                weakestScoreCategory: weakestScoreCategory
             });
             return docRef.id;
         } catch (e) {
@@ -312,17 +340,33 @@ document.addEventListener('DOMContentLoaded', function() {
                 const data = docSnap.data();
                 const scores = data.scores;
                 const userName = data.userName;
-                const docId = id;
+                const highestScoreCategory = data.highestScoreCategory;
                 
-                renderResultPage(scores, userName, docId);
+                const allCategoryScores = Object.values(scores).reduce((acc, val) => Object.assign(acc, val), {});
+                const highestScore = allCategoryScores[highestScoreCategory];
+                const highestScoreCategories = Object.keys(allCategoryScores).filter(category => allCategoryScores[category] === highestScore);
+                
+                let strongestMessage = '';
+                const count = highestScoreCategories.length;
+                if (count >= 5) {
+                    strongestMessage = `**${highestScoreCategories.join(', ')}** 등 여러 분야에서 뛰어난 역량을 보이고 있습니다.`;
+                } else if (count >= 2) {
+                    strongestMessage = `**${highestScoreCategories.join(', ')}** 분야에서 뛰어난 강점을 가지고 있습니다.`;
+                } else {
+                    strongestMessage = `당신의 가장 뚜렷한 강점 분야는 **<${highestScoreCategory}>** 입니다.`;
+                }
+                
+                const weakestScoreCategories = data.weakestScoreCategory ? data.weakestScoreCategory.split(', ') : [];
+
+                renderResultPage(scores, userName, id, highestScoreCategory, strongestMessage, weakestScoreCategories);
             } else {
                 alert("유효하지 않은 결과 링크입니다.");
-                if (elements.startPage) elements.startPage.classList.remove('hidden');
+                elements.startPage?.classList.remove('hidden');
             }
         } catch(e) {
             console.error("Firestore에서 문서 로딩 중 오류:", e);
-            alert("결과를 불러오는 중 오류가 발생했습니다. 개발자 콘솔을 확인해주세요.");
-            if (elements.startPage) elements.startPage.classList.remove('hidden');
+            alert("결과를 불러오는 중 오류가 발생했습니다.");
+            elements.startPage?.classList.remove('hidden');
         }
     }
 });
