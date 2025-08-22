@@ -1,4 +1,4 @@
-import { allQuestions } from './questions.js';
+import { allQuestions, topicDescriptions } from './questions.js';
 import { programRecommendations } from './programs.js';
 
 export const chartInstances = {};
@@ -67,10 +67,6 @@ export function recommendPrograms(allCategoryScores, weakestScoreCategories = []
     }
 }
 
-
-// ==================================================
-// ⬇️ 팝업(모달) 제어 함수가 최종 수정되었습니다 ⬇️     
-// ==================================================
 export function showProgramModal(program) {
     const programModal = document.getElementById('program-modal');
     const modalImage = document.getElementById('modal-image');
@@ -78,33 +74,29 @@ export function showProgramModal(program) {
     const modalDescription = document.getElementById('modal-description');
     const modalLink = document.getElementById('modal-link');
     
-    // 1. 이미지 처리
     if (modalImage) {
         if (program.image) {
             modalImage.src = program.image;
-            modalImage.style.display = 'block'; // 이미지가 있으면 보여주기
+            modalImage.style.display = 'block';
         } else {
-            modalImage.style.display = 'none'; // 이미지가 없으면 숨기기
+            modalImage.style.display = 'none';
         }
     }
     
-    // 2. 제목 및 설명 처리
     if (modalTitle) modalTitle.textContent = program.name || '';
     if (modalDescription) modalDescription.textContent = program.description || '';
 
-    // 3. 링크 버튼 처리
     if (modalLink) {
         if (program.link) {
             modalLink.href = program.link;
-            modalLink.style.display = 'inline-block'; // 링크가 있으면 보여주기
+            modalLink.style.display = 'inline-block';
         } else {
-            modalLink.style.display = 'none'; // 링크가 없으면 숨기기
+            modalLink.style.display = 'none';
         }
     }
     
     programModal?.classList.remove('hidden');
 }
-
 
 export function drawRadarChart(canvasId, labels, data, suggestedMax) {
     const ctx = document.getElementById(canvasId);
@@ -159,47 +151,40 @@ export function renderResultPage(scores, userName, docId = null, highestScoreCat
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     const resultTitle = document.getElementById('result-title');
-    if (resultTitle) resultTitle.textContent = `${userName}님의 역량 진단 결과입니다.`;
+    if (resultTitle) resultTitle.textContent = `역량 진단 결과입니다.`;
 
     const topic1 = surveyTopics[0];
     const categories1 = Object.keys(allQuestions[topic1]);
     const data1 = categories1.map(category => scores[topic1]?.[category] || 0);
     const chartTitle1 = document.getElementById('chart-title-1');
     if (chartTitle1) chartTitle1.textContent = topic1;
-    drawRadarChart('myChart1', categories1, data1, 50);
+    drawRadarChart('myChart1', categories1, data1, 25);
 
     const topic2 = surveyTopics[1];
     const categories2 = Object.keys(allQuestions[topic2]);
     const data2 = categories2.map(category => scores[topic2]?.[category] || 0);
     const chartTitle2 = document.getElementById('chart-title-2');
     if (chartTitle2) chartTitle2.textContent = topic2;
-    drawRadarChart('myChart2', categories2, data2, 50);
+    drawRadarChart('myChart2', categories2, data2, 25);
 
     const resultText = document.getElementById('result-text');
     if(resultText) {
         resultText.innerHTML = `
-            <h4>점수별 역량 해석</h4>
-            <p><strong>40~50점:</strong> 매우 강점 (해당 분야에 대한 관심과 참여 의지가 높고 역량도 강함)</p>
-            <p><strong>30~39점:</strong> 보통 이상 (관심과 역량이 평균 이상, 꾸준한 활동 시 더 성장 가능)</p>
-            <p><strong>20~29점:</strong> 보통 이하(관심이 낮거나 경험 부족, 활동 기회 확대 필요)</p>
-            <p><strong>10~19점:</strong> 매우 부족(관심과 참여도가 낮고 경험이 거의 없음, 집중 지원 필요)</p>
+            <h4>점수별 역량 해석 (25점 만점 기준)</h4>
+            <p><strong>20~25점:</strong> 매우 강점(해당 분야에 대한 관심·참여 의지가 높고 역량도 강함)</p>
+            <p><strong>15~19점:</strong> 보통 이상(관심과 역량이 평균 이상, 꾸준한 활동 시 더 성장 가능)</p>
+            <p><strong>10~14점:</strong> 보통 이하(관심이 낮거나 경험 부족, 활동 기회 확대 필요</p>
+            <p><strong>5~9점:</strong> 매우 부족(관심·참여도가 낮고 경험이 거의 없음, 집중 지원 필요)</p>
         `;
     }
     
     const strongPointContainer = document.getElementById('strong-point-container');
     if (highestScoreCategory && strongPointContainer) {
         const strongPointTitle = document.getElementById('strong-point-title');
-        const strongPointImage = document.getElementById('strong-point-image');
         const strongPointDescription = document.getElementById('strong-point-description');
 
         if (strongPointTitle) strongPointTitle.textContent = `당신의 강점 분야`;
-        const strongPointProgram = programRecommendations[highestScoreCategory]?.find(p => p.strongPointImage);
-        if (strongPointProgram && strongPointImage) {
-            strongPointImage.src = strongPointProgram.image;
-            strongPointImage.style.display = 'block';
-        } else if (strongPointImage) {
-            strongPointImage.style.display = 'none';
-        }
+        
         if (strongPointDescription) strongPointDescription.innerHTML = strongestMessage || `당신은 **<${highestScoreCategory}>** 분야에 강점을 가지고 있습니다!`;
         strongPointContainer.classList.remove('hidden');
     } else {

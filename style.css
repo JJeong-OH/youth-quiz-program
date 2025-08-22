@@ -44,6 +44,26 @@ p {
     margin-bottom: 20px;
 }
 
+/* ================================================== */
+/* ⬇️ 아이콘 제목 정렬을 위한 스타일 (새로 추가됨) ⬇️ */
+/* ================================================== */
+.title-with-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px; /* 아이콘과 텍스트 사이 간격 */
+}
+
+.title-with-icon img {
+    width: 60px; /* 더 큰 너비 */
+    height: auto; /* 높이를 자동으로 조정하여 원본 비율 유지 */
+}
+
+#page-title {
+    margin-bottom: 0; /* h1 태그의 기본 마진 제거 */
+}
+/* ================================================== */
+
 #start-page {
     text-align: center;
 }
@@ -188,14 +208,6 @@ p {
 #strong-point-container h3, #recommendation-container h3, .result-box h4 {
     color: #007bff;
     margin-top: 0;
-}
-
-#strong-point-container #strong-point-image {
-    width: 100%;
-    height: auto;
-    max-width: 400px;
-    margin: 10px auto;
-    border-radius: 8px;
 }
 
 #strong-point-container #strong-point-description,

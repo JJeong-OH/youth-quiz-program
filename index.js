@@ -1,5 +1,5 @@
 import { getFirestore, collection, addDoc, getDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { allQuestions, topicDescriptions } from './questions.js';
+import { allQuestions, topicDescriptions } from './questions.js'; 
 import { renderResultPage, surveyTopics } from './common.js';
 
 let db;
@@ -104,29 +104,34 @@ document.addEventListener('DOMContentLoaded', function() {
             const currentTopic = surveyTopics[currentTopicIndex];
             const currentCategories = Object.keys(allQuestions[currentTopic]);
             const currentCategory = currentCategories[currentPageIndex];
-
-            if (elements.pageTitle) elements.pageTitle.textContent = `${currentTopic}`;
             
-            if (elements.quizDescriptionArea) {
-                const descriptionData = topicDescriptions[currentCategory];
-                let descHtml = '';
+            const descriptionData = topicDescriptions[currentCategory];
+            const pageTitleIcon = document.getElementById('page-title-icon');
 
+            // h1 제목을 현재 소분류 이름으로 변경
+            if (elements.pageTitle) elements.pageTitle.textContent = currentCategory;
+            
+            // 소분류에 맞는 아이콘 표시
+            if (pageTitleIcon && descriptionData && descriptionData.icon) {
+                pageTitleIcon.src = descriptionData.icon;
+            }
+
+            if (elements.quizDescriptionArea) {
+                let descHtml = '';
+                // 설명 부분에서는 더 이상 h4 제목이 필요 없으므로 ul 목록만 생성
                 if (descriptionData && descriptionData.description) {
                     descHtml = `
-                        <h4>${currentCategory}</h4>
-                        <ul class="description-list" style="text-align: left; padding-left: 20px; margin-bottom: 0;">
+                        <ul class="description-list" style="text-align: left; padding-left: 20px; margin-top: 5px;">
                             ${descriptionData.description.map(item => `<li>${item}</li>`).join('')}
                         </ul>
                     `;
                 }
-
                 descHtml += `<p style="margin-top: 20px;">아래 문항들을 읽고, 본인에게 해당하는 정도를 각각 선택해 주세요.</p>`;
                 elements.quizDescriptionArea.innerHTML = descHtml;
             }
 
             if (elements.quizForm) elements.quizForm.innerHTML = '';
             
-            // --- ⬇️ 여러 질문을 모두 화면에 표시하도록 수정 ⬇️ ---
             const currentQuestions = allQuestions[currentTopic]?.[currentCategory] || [];
             
             currentQuestions.forEach((questionText, index) => {
@@ -135,7 +140,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 questionContainer.dataset.index = index;
                 
                 const p = document.createElement('p');
-                // 각 질문 앞에 번호를 붙여줌
                 p.textContent = `${index + 1}. ${questionText}`;
                 questionContainer.appendChild(p);
 
@@ -153,7 +157,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 optionsData.forEach(option => {
                     const input = document.createElement('input');
                     input.type = 'radio';
-                    // 각 질문의 name 속성을 고유하게 만들어줌
                     input.name = `q${currentTopicIndex}-${currentPageIndex}-${index}`;
                     input.value = option.value;
                     input.id = `q${currentTopicIndex}-${currentPageIndex}-${index}-${option.value}`;
