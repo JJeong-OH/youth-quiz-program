@@ -4,8 +4,8 @@ body {
     margin: 0;
     padding: 20px;
     display: flex;
-    justify-content: center;
-    align-items: center;
+    justify-content: flex-start;    
+    align-items: flex-start;     
     min-height: 100vh;
 }
 
@@ -182,12 +182,11 @@ p {
 }
 
 #result-page {
-    text-align: left;
+    text-align: LEFT;
 }
 
 #result-page #result-text {
     margin-top: 20px;
-    text-align: left;
 }
 
 .chart-container {
