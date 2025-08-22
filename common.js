@@ -53,7 +53,6 @@ export function recommendPrograms(allCategoryScores, weakestScoreCategories = []
         programListContainer.appendChild(panel);
     });
 
-    // 아코디언 클릭 이벤트 리스너 추가
     const accordions = document.getElementsByClassName('accordion');
     for (let i = 0; i < accordions.length; i++) {
         accordions[i].addEventListener('click', function() {
@@ -69,17 +68,43 @@ export function recommendPrograms(allCategoryScores, weakestScoreCategories = []
 }
 
 
+// ==================================================
+// ⬇️ 팝업(모달) 제어 함수가 최종 수정되었습니다 ⬇️     
+// ==================================================
 export function showProgramModal(program) {
     const programModal = document.getElementById('program-modal');
     const modalImage = document.getElementById('modal-image');
     const modalTitle = document.getElementById('modal-title');
     const modalDescription = document.getElementById('modal-description');
+    const modalLink = document.getElementById('modal-link');
     
-    if (modalImage) modalImage.src = program.image || '';
+    // 1. 이미지 처리
+    if (modalImage) {
+        if (program.image) {
+            modalImage.src = program.image;
+            modalImage.style.display = 'block'; // 이미지가 있으면 보여주기
+        } else {
+            modalImage.style.display = 'none'; // 이미지가 없으면 숨기기
+        }
+    }
+    
+    // 2. 제목 및 설명 처리
     if (modalTitle) modalTitle.textContent = program.name || '';
     if (modalDescription) modalDescription.textContent = program.description || '';
+
+    // 3. 링크 버튼 처리
+    if (modalLink) {
+        if (program.link) {
+            modalLink.href = program.link;
+            modalLink.style.display = 'inline-block'; // 링크가 있으면 보여주기
+        } else {
+            modalLink.style.display = 'none'; // 링크가 없으면 숨기기
+        }
+    }
+    
     programModal?.classList.remove('hidden');
 }
+
 
 export function drawRadarChart(canvasId, labels, data, suggestedMax) {
     const ctx = document.getElementById(canvasId);
@@ -170,7 +195,7 @@ export function renderResultPage(scores, userName, docId = null, highestScoreCat
         if (strongPointTitle) strongPointTitle.textContent = `당신의 강점 분야`;
         const strongPointProgram = programRecommendations[highestScoreCategory]?.find(p => p.strongPointImage);
         if (strongPointProgram && strongPointImage) {
-            strongPointImage.src = strongPointProgram.strongPointImage;
+            strongPointImage.src = strongPointProgram.image;
             strongPointImage.style.display = 'block';
         } else if (strongPointImage) {
             strongPointImage.style.display = 'none';
