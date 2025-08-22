@@ -151,7 +151,7 @@ export function renderResultPage(scores, userName, docId = null, highestScoreCat
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     const resultTitle = document.getElementById('result-title');
-    if (resultTitle) resultTitle.textContent = `역량 진단 결과입니다.`;
+    if (resultTitle) resultTitle.textContent = `${userName}님의 역량 진단 결과입니다.`;
 
     const topic1 = surveyTopics[0];
     const categories1 = Object.keys(allQuestions[topic1]);
