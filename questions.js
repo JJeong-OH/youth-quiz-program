@@ -1,6 +1,5 @@
 // questions.js
 
-// 설문 질문 데이터 (새로운 구성으로 업데이트 및 번호 제거)
 export const allQuestions = {
     // 1단계 설문: 청소년활동 분야
     '청소년활동 분야': {
@@ -184,7 +183,7 @@ export const topicDescriptions = {
             "핵심 키워드: 팀워크, 책임 분담, 상호 존중"
         ]
     },
-    "의사소통": {
+    "의사소통 역량": {
         icon: "./images/의사소통.png",
         description: [
             "자신의 생각을 명확히 표현하고 타인의 의견을 경청·이해하는 능력입니다.",
