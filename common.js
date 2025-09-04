@@ -67,37 +67,48 @@ export function recommendPrograms(allCategoryScores, weakestScoreCategories = []
     }
 }
 
+// common.js 파일에서 showProgramModal 함수를 아래 코드로 교체하세요.
+
 export function showProgramModal(program) {
-    const programModal = document.getElementById('program-modal');
-    const modalImage = document.getElementById('modal-image');
-    const modalTitle = document.getElementById('modal-title');
-    const modalDescription = document.getElementById('modal-description');
-    const modalLink = document.getElementById('modal-link');
-    
-    if (modalImage) {
-        if (program.image) {
-            modalImage.src = program.image;
-            modalImage.style.display = 'block';
-        } else {
-            modalImage.style.display = 'none';
-        }
-    }
-    
-    if (modalTitle) modalTitle.textContent = program.name || '';
-    if (modalDescription) modalDescription.textContent = program.description || '';
+    const programModal = document.getElementById('program-modal');
+    const modalImage = document.getElementById('modal-image');
+    const modalTitle = document.getElementById('modal-title');
+    const modalDescription = document.getElementById('modal-description');
+    const modalLink = document.getElementById('modal-link'); 
+    
+    if (modalImage) {
+        if (program.image) {
+            modalImage.src = program.image;
+            modalImage.style.display = 'block';
+        } else {
+            modalImage.style.display = 'none';
+        }
+    }
+    
+    if (modalTitle) modalTitle.textContent = program.name || '';
+    if (modalDescription) modalDescription.textContent = program.description || '';
 
-    if (modalLink) {
-        if (program.link) {
+    if (modalLink) {
+        const placeholderLink = "여기에 링크 주소 입력";
+        
+        modalLink.style.display = 'inline-block';
+
+        if (program.link === placeholderLink || !program.link) {
+            modalLink.href = "#"; 
+            modalLink.target = ""; 
+            modalLink.onclick = (event) => {
+                event.preventDefault(); 
+                alert("신청 기간이 아니거나 마감된 프로그램입니다.");
+            };
+        } else {
             modalLink.href = program.link;
-            modalLink.style.display = 'inline-block';
-        } else {
-            modalLink.style.display = 'none';
+            modalLink.target = "_blank";
+            modalLink.onclick = null; 
         }
-    }
-    
-    programModal?.classList.remove('hidden');
+    }
+    
+    programModal?.classList.remove('hidden');
 }
-
 export function drawRadarChart(canvasId, labels, data, suggestedMax) {
     const ctx = document.getElementById(canvasId);
     if (!ctx) return;
