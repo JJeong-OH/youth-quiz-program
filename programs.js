@@ -4,7 +4,7 @@
 const IMG_YOUTH_COMMITTEE = "./images/프로그램별 활동사진/청소년운영위원회.jpg";
 const IMG_TALENT_CLUB_UNION = "./images/프로그램별 활동사진/재능동아리_버스킹(2024년).jpg";
 const IMG_HARMONY_UNION = "./images/프로그램별 활동사진/하모니 연합활동.jpg";
-//const IMG_BARISTA_CLUB = "./images/바리스타.jpg";
+const IMG_BARISTA_CLUB = "./images/바리스타.jpg";
 const IMG_IMAGINATION_SCHOOL = "./images/프로그램별 활동사진/상상스쿨.jpg";
 const IMG_SONG_DANCE_CONTEST = "./images/프로그램별 활동사진/미추홀 청소년 노래 댄스대회.jpg";
 const IMG_TALENT_ON = "./images/프로그램별 활동사진/교육지원청 복지사업 재능온.jpg";
@@ -20,8 +20,8 @@ const IMG_FAMILY_DAY = "./images/프로그램별 활동사진/패밀리데이.jp
 const IMG_DOGHOLIC = "./images/프로그램별 활동사진/도그홀릭(2024년).jpg";
 const IMG_WARRIORS_PATH = "./images/프로그램별 활동사진/보훈부 공모 '용사의 길'.jpg";
 const IMG_SMART_HYO = "./images/프로그램별 활동사진/스마트하게함께해HYO.jpg";
-//const IMG_YES_INCHEON = "./images/YES인천.jpg"; 
-//const IMG_FAMILY_CAMPING = "./images/가족캠핑.jpg"; 
+const IMG_YES_INCHEON = "./images/YES인천.jpg"; 
+const IMG_FAMILY_CAMPING = "./images/가족캠핑.jpg"; 
 const IMG_CODING_ENVIRONMENT = "./images/프로그램별 활동사진/환경을코딩하다.jpg";
 const IMG_FLYING_FAMILY = "./images/프로그램별 활동사진/비행가족.jpg";
 
