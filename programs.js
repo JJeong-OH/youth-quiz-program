@@ -1,39 +1,34 @@
 // programs.js
 
-// =================================================================
-// ⬇️ 1. 이미지 및 링크 주소를 상수로 미리 정의 (여기서만 관리) ⬇️
-// =================================================================
-
 // --- 이미지 경로 상수 ---
-const IMG_YOUTH_COMMITTEE = "./images/청운위.png";
-const IMG_TALENT_CLUB_UNION = "./images/재능동아리.jpg";
-const IMG_HARMONY_UNION = "./images/하모니.jpg";
-const IMG_BARISTA_CLUB = "./images/바리스타.jpg";
-const IMG_IMAGINATION_SCHOOL = "./images/상상스쿨.jpg";
-const IMG_SONG_DANCE_CONTEST = "./images/노래댄스.png";
-const IMG_TALENT_ON = "./images/재능온.jpg";
-const IMG_CULTURE_PLAYGROUND = "./images/문화놀이터.jpg";
-const IMG_SPORTS_PLAYGROUND = "./images/스포츠놀이터.jpg";
-const IMG_FADE_IN_CONTEST = "./images/FadeIn.png";
-const IMG_FAMILY_HISTORY = "./images/패밀리히스토리.jpg";
-const IMG_GREEN_FESTIVAL = "./images/그린페스티벌.jpg";
-const IMG_EXPERIENCE_PLAYGROUND = "./images/체험놀이터.jpg";
-const IMG_FUTURE_ANALYSIS = "./images/미래적성.jpg";
-const IMG_COLOR_FOOD = "./images/가족컬러푸드.jpg";
-const IMG_FAMILY_DAY = "./images/패밀리데이.jpg";
-const IMG_DOGHOLIC = "./images/도그홀릭.jpg";
-const IMG_WARRIORS_PATH = "./images/용사의길.jpg";
-const IMG_SMART_HYO = "./images/스마트효.png";
-const IMG_YES_INCHEON = "./images/YES인천.jpg";
-const IMG_FAMILY_CAMPING = "./images/가족캠핑.jpg";
-const IMG_CODING_ENVIRONMENT = "./images/환경코딩.jpg";
-const IMG_FLYING_FAMILY = "./images/비행가족.jpg";
+const IMG_YOUTH_COMMITTEE = "./images/프로그램별 활동사진/청소년운영위원회.jpg";
+const IMG_TALENT_CLUB_UNION = "./images/프로그램별 활동사진/재능동아리_버스킹(2024년).jpg";
+const IMG_HARMONY_UNION = "./images/프로그램별 활동사진/하모니 연합활동.jpg";
+//const IMG_BARISTA_CLUB = "./images/바리스타.jpg";
+const IMG_IMAGINATION_SCHOOL = "./images/프로그램별 활동사진/상상스쿨.jpg";
+const IMG_SONG_DANCE_CONTEST = "./images/프로그램별 활동사진/미추홀 청소년 노래 댄스대회.jpg";
+const IMG_TALENT_ON = "./images/프로그램별 활동사진/교육지원청 복지사업 재능온.jpg";
+const IMG_CULTURE_PLAYGROUND = "./images/프로그램별 활동사진/문화놀이터-창작예술.jpg"; 
+const IMG_SPORTS_PLAYGROUND = "./images/프로그램별 활동사진/스포츠놀이터-방송댄스.jpg"; 
+const IMG_FADE_IN_CONTEST = "./images/프로그램별 활동사진/우수 청소년활동 지원사업 'Fade In'.jpg";
+const IMG_FAMILY_HISTORY = "./images/프로그램별 활동사진/패밀리 플레이 히스토리.jpg";
+const IMG_GREEN_FESTIVAL = "./images/프로그램별 활동사진/그린페스티벌.jpg";
+const IMG_EXPERIENCE_PLAYGROUND = "./images/프로그램별 활동사진/체험놀이터.jpg";
+const IMG_FUTURE_ANALYSIS = "./images/프로그램별 활동사진/미래적성분석 프로그램(영상편집편).jpg";
+const IMG_COLOR_FOOD = "./images/프로그램별 활동사진/가족컬러푸드.jpg";
+const IMG_FAMILY_DAY = "./images/프로그램별 활동사진/패밀리데이.jpg";
+const IMG_DOGHOLIC = "./images/프로그램별 활동사진/도그홀릭(2024년).jpg";
+const IMG_WARRIORS_PATH = "./images/프로그램별 활동사진/보훈부 공모 '용사의 길'.jpg";
+const IMG_SMART_HYO = "./images/프로그램별 활동사진/스마트하게함께해HYO.jpg";
+//const IMG_YES_INCHEON = "./images/YES인천.jpg"; 
+//const IMG_FAMILY_CAMPING = "./images/가족캠핑.jpg"; 
+const IMG_CODING_ENVIRONMENT = "./images/프로그램별 활동사진/환경을코딩하다.jpg";
+const IMG_FLYING_FAMILY = "./images/프로그램별 활동사진/비행가족.jpg";
 
-// --- 바로가기 링크 상수 (내용을 채워주세요) ---
-const LINK_YOUTH_COMMITTEE = "여기에 링크 주소 입력";
+const LINK_YOUTH_COMMITTEE = "여기에 링크 주소 입력";   
 const LINK_TALENT_CLUB_UNION = "여기에 링크 주소 입력";
 const LINK_HARMONY_UNION = "여기에 링크 주소 입력";
-const LINK_BARISTA_CLUB = "여기에 링크 주소 입력";
+const LINK_BARISTA_CLUB = "여기에 링크 주소 입력";  
 const LINK_IMAGINATION_SCHOOL = "여기에 링크 주소 입력";
 const LINK_SONG_DANCE_CONTEST = "여기에 링크 주소 입력";
 const LINK_TALENT_ON = "여기에 링크 주소 입력";
@@ -54,12 +49,7 @@ const LINK_FAMILY_CAMPING = "여기에 링크 주소 입력";
 const LINK_CODING_ENVIRONMENT = "http://icyouth.or.kr/home2012/bbs/program.php?m=v&p_no=183";
 const LINK_FLYING_FAMILY = "여기에 링크 주소 입력";
 
-
-// =================================================================
-// ⬇️ 2. 아래에서는 정의된 상수 이름만 사용 ⬇️
-// =================================================================
 export const programRecommendations = {
-    // 1단계: 청소년활동 분야
     "자기개발분야": [
         { name: "청소년운영위원회", image: IMG_YOUTH_COMMITTEE, description: "청소년활동시설의 운영에 직접 참여하여 청소년의 의견을 반영하는 활동.", link: LINK_YOUTH_COMMITTEE, strongPointImage: true },
         { name: "청소년재능동아리연합회", image: IMG_TALENT_CLUB_UNION, description: "다양한 재능을 가진 청소년들이 모여 동아리 활동을 기획하고 운영하는 활동.", link: LINK_TALENT_CLUB_UNION },
@@ -112,7 +102,7 @@ export const programRecommendations = {
     ],
 
     // 2단계: 청소년활동 7대 핵심역량
-    "비판적 사고": [
+    "비판적사고": [
         { name: "미추홀 청소년 노래·댄스대회", image: IMG_SONG_DANCE_CONTEST, description: "대회 준비를 통해 자기관리와 목표 달성을 연습.", link: LINK_SONG_DANCE_CONTEST, strongPointImage: true },
         { name: "청소년운영위원회", image: IMG_YOUTH_COMMITTEE, description: "회의 참여와 운영을 통해 자기주도성과 책임감을 기르는 활동.", link: LINK_YOUTH_COMMITTEE },
         { name: "진흥원 공모 ‘Fade In’", image: IMG_FADE_IN_CONTEST, description: "개인 프로젝트를 기획하고 실행하며 자기관리 능력을 키우는 프로그램.", link: LINK_FADE_IN_CONTEST },
@@ -142,12 +132,12 @@ export const programRecommendations = {
         { name: "바리스타동아리", image: IMG_BARISTA_CLUB, description: "동아리 회원, 손님들과 교류하며 대인관계를 키움.", link: LINK_BARISTA_CLUB },
         { name: "가족캠핑", image: IMG_FAMILY_CAMPING, description: "가족과 함께 캠핑을 하며 친밀감을 형성.", link: LINK_FAMILY_CAMPING }
     ],
-    "창의융합 역량": [
+    "창의력": [
         { name: "환경을 코딩하다", image: IMG_CODING_ENVIRONMENT, description: "코딩과 환경 문제를 융합하여 새로운 해결책을 모색.", link: LINK_CODING_ENVIRONMENT, strongPointImage: true },
         { name: "미래적성분석 프로그램", image: IMG_FUTURE_ANALYSIS, description: "다양한 진로를 융합하여 새로운 직업을 상상.", link: LINK_FUTURE_ANALYSIS },
         { name: "스마트하게 함께해HYO", image: IMG_SMART_HYO, description: "기술과 효를 융합하여 새로운 사회적 가치를 창출.", link: LINK_SMART_HYO }
     ],
-    "문제해결 역량": [
+    "협업": [
         { name: "청소년운영위원회", image: IMG_YOUTH_COMMITTEE, description: "청소년 시설의 문제점을 찾아 해결 방안을 모색.", link: LINK_YOUTH_COMMITTEE, strongPointImage: true },
         { name: "컨소시엄 Yes 인천", image: IMG_YES_INCHEON, description: "다양한 사회 문제를 해결하기 위해 여러 기관과 협력.", link: LINK_YES_INCHEON },
         { name: "진흥원 공모 ‘Fade In’", image: IMG_FADE_IN_CONTEST, description: "공모전 주제에 대한 문제를 정의하고 해결책을 제시.", link: LINK_FADE_IN_CONTEST },
@@ -160,7 +150,7 @@ export const programRecommendations = {
         { name: "가족컬러푸드", image: IMG_COLOR_FOOD, description: "가족과 함께 요리하며 문제해결 능력을 키움.", link: LINK_COLOR_FOOD },
         { name: "스마트하게 함께해HYO", image: IMG_SMART_HYO, description: "기술적 문제를 해결하며 효를 실천.", link: LINK_SMART_HYO }
     ],
-    "대인관계 역량": [
+    "진로개발": [
         { name: "청소년운영위원회", image: IMG_YOUTH_COMMITTEE, description: "다양한 청소년들과 함께 활동하며 대인관계 능력을 향상.", link: LINK_YOUTH_COMMITTEE, strongPointImage: true },
         { name: "보훈부 공모 ‘용사의 길’", image: IMG_WARRIORS_PATH, description: "팀 프로젝트를 통해 협력과 대인관계를 배우는 활동.", link: LINK_WARRIORS_PATH },
         { name: "비행가족", image: IMG_FLYING_FAMILY, description: "가족과의 관계를 돈독히 하고 소통을 증진.", link: LINK_FLYING_FAMILY },
@@ -178,7 +168,7 @@ export const programRecommendations = {
         { name: "바리스타동아리", image: IMG_BARISTA_CLUB, description: "동아리 회원, 손님들과 교류하며 대인관계를 키움.", link: LINK_BARISTA_CLUB },
         { name: "가족캠핑", image: IMG_FAMILY_CAMPING, description: "가족과 함께 캠핑을 하며 친밀감을 형성.", link: LINK_FAMILY_CAMPING }
     ],
-    "시민의식 역량": [
+    "사회정서": [
         { name: "청소년운영위원회", image: IMG_YOUTH_COMMITTEE, description: "시설 운영에 참여하며 민주적 절차와 시민의식을 배움.", link: LINK_YOUTH_COMMITTEE, strongPointImage: true },
         { name: "보훈부 공모 ‘용사의 길’", image: IMG_WARRIORS_PATH, description: "역사 탐방을 통해 애국심과 시민의식을 함양.", link: LINK_WARRIORS_PATH },
         { name: "컨소시엄 Yes 인천", image: IMG_YES_INCHEON, description: "사회 문제 해결을 위해 시민으로서의 역할을 고민.", link: LINK_YES_INCHEON },
